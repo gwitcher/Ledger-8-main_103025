@@ -64,6 +64,17 @@ struct SettingsView: View {
                     
                 }
                 
+                Section("Data Management") {
+                    NavigationLink {
+                        DataBackupView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "externaldrive")
+                            Text("Backup Data")
+                        }
+                    }
+                }
+                
 //                Toggle("Add to Calendar", systemImage: "calendar.badge.plus", isOn: $userData.addToCalendar)
 //                    .foregroundStyle(.black)
                 

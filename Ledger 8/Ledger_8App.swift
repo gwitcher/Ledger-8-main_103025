@@ -23,7 +23,7 @@ struct Ledger_8App: App {
     }
     
     init() {
-        let schema = Schema([Project.self])
+        let schema = Schema([Project.self, Client.self, Item.self, Invoice.self])
         let config  = ModelConfiguration(dbName, schema: schema)
         do{
             container = try ModelContainer(for: schema, configurations: config)

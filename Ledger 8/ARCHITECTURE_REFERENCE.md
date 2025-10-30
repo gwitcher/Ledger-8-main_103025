@@ -45,6 +45,8 @@
 - `ClientListView.swift` - Client directory with search/management
 - `ClientSelectView.swift` - Client picker for projects
 - `NewClientView.swift` - Client creation form (265 lines)
+- `ClientInfoView.swift` - Read-only client information display (planned)
+- `ClientDashboardView.swift` - Client project history and analytics (planned)
 - `PayerView.swift` - Client payment information view
 
 ### **💰 UI Views - Items & Billing**
@@ -67,6 +69,7 @@
 - `CompanyInfoView.swift` - Company details form (99 lines)
 - `BankingInfoView.swift` - Banking and payment app info (78 lines)
 - `CompanyLogoView.swift` - Logo display component
+- `DataBackupView.swift` - Data backup and export interface (new)
 
 ### **📈 UI Views - Analytics**
 - `Charts.swift` - Main analytics dashboard
@@ -81,6 +84,7 @@
 
 ### **🔧 Utilities & Extensions**
 - `Extensions.swift` - Project calculations, invoice generation, Date helpers, View extensions (103 lines)
+- `DataBackupService.swift` - Data export service for JSON/CSV backup (new)
 
 ### **📋 Documentation**
 - `DevelopmentSuggestions.md` - Development roadmap and improvement suggestions (90 lines)
@@ -105,6 +109,34 @@ let schema = Schema([Project.self])
 // SHOULD BE
 let schema = Schema([Project.self, Client.self, Item.self, Invoice.self])
 ```
+
+### **ID Management & Consistency**
+**Current State:**
+- `Client` model: Uses explicit `id: UUID` property
+- `Project` model: Relies on SwiftData's auto-generated `PersistentIdentifier`
+- `Item` and `Invoice` models: TBD (likely using `PersistentIdentifier`)
+
+**Recommended Improvement:**
+```swift
+// Add explicit UUID to Project model for consistency
+@Model
+class Project: Identifiable {
+    var id: UUID  // Add explicit UUID
+    // ... existing properties
+    
+    init(id: UUID = UUID(), ...) {
+        self.id = id
+        // ... existing initialization
+    }
+}
+```
+
+**Benefits of UUID Consistency:**
+- Predictable string conversion (`uuid.uuidString`)
+- Better backup/export reliability
+- Cross-platform compatibility
+- Easier testing with known IDs
+- Migration safety and control
 
 ### **Data Persistence**
 - **SwiftData:** Core project/client/item data
@@ -203,14 +235,16 @@ let schema = Schema([Project.self, Client.self, Item.self, Invoice.self])
 ### **Critical**
 - SwiftData schema missing Client, Item, Invoice models
 - Force unwraps throughout codebase need error handling
+- **ID inconsistency**: Project uses `PersistentIdentifier`, Client uses `UUID` - should standardize on explicit `UUID` for all models
 
 ### **Enhancement Opportunities**
 - Form validation implementation
 - Unit test coverage
 - Calendar integration 
 - Email functionality
-- Data export capabilities
+- Data export capabilities  
 - Advanced analytics features
+- **Model consistency**: Standardize all models to use explicit `UUID` IDs
 
 ---
 
@@ -222,6 +256,106 @@ let schema = Schema([Project.self, Client.self, Item.self, Invoice.self])
 4. **Comprehensive:** Covers entire gig lifecycle end-to-end
 5. **Professional Polish:** PDF generation, proper data relationships
 6. **User-Centric:** Thoughtful UX with swipe actions, focus management
+
+---
+
+## 🛣️ **Development Roadmap**
+
+### **Phase 1: Foundation Strengthening (2-3 weeks)**
+**Data Model Enhancements:**
+- **PRIORITY: Standardize ID management** - Add explicit `UUID` properties to Project, Item, and Invoice models for consistency with Client model
+- Change MediaType and ItemType from Enums to Strings
+- Add Location information to projects
+- Add recurring gig templates
+- Update models to accommodate international localizations
+- Update Invoice model for professional invoice tracking
+
+**Error Handling & Validation:**
+- Replace force unwraps with proper error handling
+- Add form validation
+- Add data backup/restore
+
+**Testing Infrastructure:**
+- Unit tests for calculations
+- UI tests for critical flows
+- Mock data for testing
+
+### **Phase 2: Essential Features (3-4 weeks)**
+**Core Functionality Enhancements:**
+- Comprehensive search across projects, clients, and items
+- "All Day" toggle for project dates
+- Time zone support for date selection
+- Recurring gig scheduling and templates
+- Project and item attachments (contracts, receipts, photos)
+- Import contacts from system Contacts app
+- Add date tracking to individual items
+- Visual invoice status system (created/sent/synced indicators)
+- Customizable grouping of Items by Media Type
+- Default fee templates for Item Types
+- Quick item templates (common item combinations)
+- Client relationship analytics (computed from project history)
+
+**Enhanced Invoice System:**
+- Multiple invoice templates
+- Partial payment tracking
+- Automated payment reminders
+- Tax form attachments for invoice emails
+
+**Data Model Expansions:**
+- Multiple banking information support
+- Multiple client billing addresses, emails, and phone numbers
+- Default contact/billing preferences for clients
+- Enhanced client management with separate ClientInfoView and client dashboard
+
+**Calendar Integration:**
+- Sync gigs with system calendar
+- Set reminders
+
+**Financial Analytics:**
+- Income tracking by month/year, Media Type, Item Type, Client
+- Income trend analysis
+- Tax reporting
+- Client dashboard
+
+### **Phase 3: Professional Features (4-5 weeks)**
+**Client Communication:**
+- Email integration for invoices
+- Automated follow-ups
+
+**Advanced Reporting:**
+- Detailed financial reports
+
+**Data Export/Backup:**
+- CSV imports and exports for accounting software
+- PDF reports
+- iCloud sync
+- Data backup/restore
+
+### **Phase 4: Polish & Launch (2-3 weeks)**
+**UI/UX Refinement:**
+- Accessibility improvements
+- Dark mode optimization
+- Custom themes
+- Onboarding flow
+
+**Performance Optimization:**
+- Large dataset handling
+- Memory optimization
+- Battery efficiency
+
+**App Store Preparation:**
+- App Store Connect setup
+- Screenshots and metadata
+- Privacy policy
+- Beta testing
+
+### **Future Considerations**
+**Advanced Features (Post-Launch):**
+- Payment model for tracking partial payments
+- Automated tax calculation and reporting
+- Calendar conflict detection
+- Travel time calculation integration
+- Advanced scheduling optimization
 
 ---
 
