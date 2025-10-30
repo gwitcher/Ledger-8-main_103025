@@ -514,7 +514,7 @@ struct ProjectDetailView: View {
                     HStack {
                         Text("Items: \(project.items?.count ?? 0)")
                         Spacer()
-                        Text("\(project.calculateFeeTotal(items: project.items!).formatted(.currency(code: "USD")))")
+                        Text("\(project.calculateFeeTotal(items: project.items ?? []).formatted(.currency(code: "USD")))")
                     }
                 }
             }

@@ -35,8 +35,8 @@ class Project: Identifiable {
     init(
         projectName: String = "",
         artist: String = "",
-        startDate: Date = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date())!,
-        endDate: Date = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: Date())!,
+        startDate: Date = Calendar.safeDateBySettingTime(hour: 9, minute: 0),
+        endDate: Date = Calendar.safeDateBySettingTime(hour: 10, minute: 0),
         status: Status = Status.open,
         mediaType: MediaType = MediaType.recording,
         notes: String = "",
@@ -82,6 +82,26 @@ class Project: Identifiable {
                 .question
         case .game:
                 .gamepad
+        }
+    }
+}
+
+// MARK: - Validation
+extension Project: Validatable {
+    func validate() throws {
+        // Validate project name
+        if !ValidationHelper.isNotEmpty(projectName) {
+            throw LedgerError.emptyRequiredField("Project Name")
+        }
+        
+        // Validate date range
+        if endDate <= startDate {
+            throw LedgerError.invalidDateRange
+        }
+        
+        // Validate artist name
+        if !ValidationHelper.isNotEmpty(artist) {
+            throw LedgerError.emptyRequiredField("Artist")
         }
     }
 }

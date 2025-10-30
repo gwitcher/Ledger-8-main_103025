@@ -80,3 +80,26 @@ class Client: Identifiable {
     }
 }
 
+// MARK: - Validation
+extension Client: Validatable {
+    func validate() throws {
+        // At least one of firstName, lastName, or company must be filled
+        let hasName = ValidationHelper.isNotEmpty(firstName) || ValidationHelper.isNotEmpty(lastName)
+        let hasCompany = ValidationHelper.isNotEmpty(company)
+        
+        if !hasName && !hasCompany {
+            throw LedgerError.emptyRequiredField("Name or Company")
+        }
+        
+        // Validate email format if provided
+        if ValidationHelper.isNotEmpty(email) && !ValidationHelper.isValidEmail(email) {
+            throw LedgerError.invalidEmailFormat
+        }
+        
+        // Validate phone format if provided
+        if ValidationHelper.isNotEmpty(phone) && !ValidationHelper.isValidPhoneNumber(phone) {
+            throw LedgerError.invalidPhoneFormat
+        }
+    }
+}
+

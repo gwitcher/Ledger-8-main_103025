@@ -22,7 +22,7 @@ extension Project {
     func projectsFeeTotal(projects: [Project]) -> Double {
         var projectTotal = 0.0
         for project in projects {
-            projectTotal += project.calculateFeeTotal(items: project.items!)
+            projectTotal += project.calculateFeeTotal(items: project.items ?? [])
         }
         return projectTotal
     }
@@ -87,11 +87,11 @@ extension Project {
 
 extension Date {
     func adding(minutes: Int) -> Date {
-        Calendar.current.date(byAdding: .minute, value: minutes, to: self)!
+        Calendar.current.date(byAdding: .minute, value: minutes, to: self) ?? self
     }
 
     func adding(hours: Int) -> Date {
-        Calendar.current.date(byAdding: .hour, value: hours, to: self)!
+        Calendar.current.date(byAdding: .hour, value: hours, to: self) ?? self
     }
 }
 
