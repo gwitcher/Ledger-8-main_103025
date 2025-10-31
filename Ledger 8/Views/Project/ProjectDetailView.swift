@@ -207,13 +207,14 @@ struct ProjectDetailView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                         Spacer()
-                        Button("Dismiss") {
+                        Button {
                             withAnimation(.easeOut(duration: 0.3)) {
                                 showValidationSummary = false
                             }
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.blue)
                         }
-                        .font(.caption)
-                        .foregroundColor(.blue)
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
