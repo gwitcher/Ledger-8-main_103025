@@ -25,6 +25,16 @@ struct ClientEditView: View {
     // MARK: - Focus-aware validation tracking
     @State private var emailHasBeenFocused = false
     @State private var phoneHasBeenFocused = false
+    @State private var firstNameHasBeenFocused = false
+    @State private var lastNameHasBeenFocused = false
+    @State private var companyHasBeenFocused = false
+    
+    // MARK: - Action-triggered validation indicators
+    @State private var showEmailTriangle = false
+    @State private var showPhoneTriangle = false
+    @State private var showFirstNameTriangle = false
+    @State private var showLastNameTriangle = false
+    @State private var showCompanyTriangle = false
     
     // MARK: - Validation Summary State
     @State private var showValidationSummary = false
@@ -65,7 +75,7 @@ struct ClientEditView: View {
             errors.append(.phone(phoneError))
         }
         if let nameError = nameValidationError {
-            errors.append(ValidationBannerError(fieldName: "Name or Company", message: nameError, icon: "person.fill"))
+            errors.append(ValidationBannerError(fieldName: "Name or Company", message: nameError, icon: "circle.fill"))
         }
         
         return errors
@@ -108,34 +118,64 @@ struct ClientEditView: View {
                 
                 Section("Client Info") {
                     LabeledContent {
-                        TextField("", text: $firstName)
-                            .autocorrectionDisabled()
-                            .textContentType(.name)
-                            .focused($focusField, equals: .firstName)
-                            .submitLabel(.next)
-                            .onSubmit {
-                                moveToNextField(.lastName)
+                        HStack {
+                            TextField("", text: $firstName)
+                                .autocorrectionDisabled()
+                                .textContentType(.name)
+                                .focused($focusField, equals: .firstName)
+                                .submitLabel(.next)
+                                .onSubmit {
+                                    moveToNextField(.lastName)
+                                }
+                                .onChange(of: firstName) { _, _ in
+                                    validateNameFields()
+                                }
+                                .onChange(of: focusField) { _, newValue in
+                                    // Track when first name field has been focused
+                                    if newValue == .firstName {
+                                        firstNameHasBeenFocused = true
+                                    }
+                                }
+                            
+                            // Show validation triangle for name/company requirement error
+                            if showFirstNameTriangle {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
                             }
-                            .onChange(of: firstName) { _, _ in
-                                validateNameFields()
-                            }
+                        }
                         
                     }   label: {
                         Text("First Name").foregroundStyle(.secondary)
                             
                     }
                     LabeledContent {
-                        TextField("", text: $lastName)
-                            .autocorrectionDisabled()
-                            .textContentType(.name)
-                            .focused($focusField, equals: .lastName)
-                            .submitLabel(.next)
-                            .onSubmit {
-                                moveToNextField(.email)
+                        HStack {
+                            TextField("", text: $lastName)
+                                .autocorrectionDisabled()
+                                .textContentType(.name)
+                                .focused($focusField, equals: .lastName)
+                                .submitLabel(.next)
+                                .onSubmit {
+                                    moveToNextField(.email)
+                                }
+                                .onChange(of: lastName) { _, _ in
+                                    validateNameFields()
+                                }
+                                .onChange(of: focusField) { _, newValue in
+                                    // Track when last name field has been focused
+                                    if newValue == .lastName {
+                                        lastNameHasBeenFocused = true
+                                    }
+                                }
+                            
+                            // Show validation triangle for name/company requirement error
+                            if showLastNameTriangle {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
                             }
-                            .onChange(of: lastName) { _, _ in
-                                validateNameFields()
-                            }
+                        }
                         
                     }   label: {
                         Text("Last Name").foregroundStyle(.secondary)
@@ -156,15 +196,19 @@ struct ClientEditView: View {
                                 .onChange(of: email) { _, newValue in
                                     validateEmailField(newValue)
                                 }
-                                .onChange(of: focusField) { _, newValue in
+                                .onChange(of: focusField) { oldValue, newValue in
                                     // Track when email field has been focused
                                     if newValue == .email {
                                         emailHasBeenFocused = true
                                     }
+                                    // Show triangle when user leaves field with validation error
+                                    if oldValue == .email && newValue != .email && emailHasBeenFocused && emailValidationError != nil {
+                                        showEmailTriangle = true
+                                    }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if emailHasBeenFocused && focusField != .email && emailValidationError != nil && !email.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showEmailTriangle {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -189,15 +233,19 @@ struct ClientEditView: View {
                                 .onChange(of: phone) { _, newValue in
                                     validatePhoneField(newValue)
                                 }
-                                .onChange(of: focusField) { _, newValue in
+                                .onChange(of: focusField) { oldValue, newValue in
                                     // Track when phone field has been focused
                                     if newValue == .phone {
                                         phoneHasBeenFocused = true
                                     }
+                                    // Show triangle when user leaves field with validation error
+                                    if oldValue == .phone && newValue != .phone && phoneHasBeenFocused && phoneValidationError != nil {
+                                        showPhoneTriangle = true
+                                    }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if phoneHasBeenFocused && focusField != .phone && phoneValidationError != nil && !phone.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showPhoneTriangle {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -211,17 +259,32 @@ struct ClientEditView: View {
                 
                 Section("Company"){
                     LabeledContent {
-                        TextField("", text: $company)
-                            .autocorrectionDisabled()
-                            .textContentType(.organizationName)
-                            .focused($focusField, equals: .company)
-                            .submitLabel(.next)
-                            .onSubmit {
-                                moveToNextField(.attn)
+                        HStack {
+                            TextField("", text: $company)
+                                .autocorrectionDisabled()
+                                .textContentType(.organizationName)
+                                .focused($focusField, equals: .company)
+                                .submitLabel(.next)
+                                .onSubmit {
+                                    moveToNextField(.attn)
+                                }
+                                .onChange(of: company) { _, _ in
+                                    validateNameFields()
+                                }
+                                .onChange(of: focusField) { _, newValue in
+                                    // Track when company field has been focused
+                                    if newValue == .company {
+                                        companyHasBeenFocused = true
+                                    }
+                                }
+                            
+                            // Show validation triangle for name/company requirement error
+                            if showCompanyTriangle {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
                             }
-                            .onChange(of: company) { _, _ in
-                                validateNameFields()
-                            }
+                        }
                     }   label: {
                         Text("Company").foregroundStyle(.secondary)
                             
@@ -339,21 +402,29 @@ struct ClientEditView: View {
                 validateNameFields()
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel", systemImage: "xmark", role: .cancel) {
-                        dismiss()
-                    }
-                }
-                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done", systemImage: "checkmark.circle.fill") {
-                        // Run final validation
+                        // Run final validation including name requirement
                         validateNameFields()
-                        validateEmailField(email)
-                        validatePhoneField(phone)
+                        validateEmailFieldForSubmission(email)
+                        validatePhoneFieldForSubmission(phone)
                         
-                        // If there are validation errors, show the summary banner
+                        // If there are validation errors, show the summary banner and triangles
                         if hasValidationErrors {
+                            // Show triangles for fields with errors
+                            if emailValidationError != nil {
+                                showEmailTriangle = true
+                            }
+                            if phoneValidationError != nil {
+                                showPhoneTriangle = true
+                            }
+                            // Show triangles for all name/company fields if name requirement error exists
+                            if nameValidationError != nil {
+                                showFirstNameTriangle = true
+                                showLastNameTriangle = true
+                                showCompanyTriangle = true
+                            }
+                            
                             withAnimation(.easeIn(duration: 0.3)) {
                                 showValidationSummary = true
                             }
@@ -370,8 +441,6 @@ struct ClientEditView: View {
                         // If saveClient() returns false, we stay on the form
                         // The validation alert will be shown via the .validationErrorAlert modifier
                     }
-                    .disabled(hasValidationErrors)
-                    .foregroundColor(hasValidationErrors ? .gray : .blue)
                 }
             }
             .validationErrorAlert($validationState.currentError)
@@ -386,7 +455,26 @@ struct ClientEditView: View {
         // Clear error if field is empty (email is optional)
         guard !email.isEmpty else {
             emailValidationError = nil
+            showEmailTriangle = false
             checkAndHideValidationSummary()
+            return
+        }
+        
+        // Use ValidationHelper to check email format
+        if ValidationHelper.isValidEmail(email) {
+            emailValidationError = nil
+            showEmailTriangle = false
+        } else {
+            emailValidationError = "Invalid email format"
+        }
+        checkAndHideValidationSummary()
+    }
+    
+    /// Validates email field for form submission (doesn't clear triangle flags)
+    private func validateEmailFieldForSubmission(_ email: String) {
+        // Clear error if field is empty (email is optional)
+        guard !email.isEmpty else {
+            emailValidationError = nil
             return
         }
         
@@ -396,7 +484,6 @@ struct ClientEditView: View {
         } else {
             emailValidationError = "Invalid email format"
         }
-        checkAndHideValidationSummary()
     }
     
     /// Validates phone field in real-time using ValidationHelper
@@ -404,7 +491,26 @@ struct ClientEditView: View {
         // Clear error if field is empty (phone is optional)
         guard !phone.isEmpty else {
             phoneValidationError = nil
+            showPhoneTriangle = false
             checkAndHideValidationSummary()
+            return
+        }
+        
+        // Use ValidationHelper to check phone format
+        if ValidationHelper.isValidPhoneNumber(phone) {
+            phoneValidationError = nil
+            showPhoneTriangle = false
+        } else {
+            phoneValidationError = "Invalid phone number format"
+        }
+        checkAndHideValidationSummary()
+    }
+    
+    /// Validates phone field for form submission (doesn't clear triangle flags)
+    private func validatePhoneFieldForSubmission(_ phone: String) {
+        // Clear error if field is empty (phone is optional)
+        guard !phone.isEmpty else {
+            phoneValidationError = nil
             return
         }
         
@@ -414,7 +520,6 @@ struct ClientEditView: View {
         } else {
             phoneValidationError = "Invalid phone number format"
         }
-        checkAndHideValidationSummary()
     }
     
     /// Validates that at least name or company is provided
@@ -426,6 +531,10 @@ struct ClientEditView: View {
             nameValidationError = "Name or Company is required"
         } else {
             nameValidationError = nil
+            // Clear triangles when error is resolved
+            showFirstNameTriangle = false
+            showLastNameTriangle = false
+            showCompanyTriangle = false
         }
         checkAndHideValidationSummary()
     }
