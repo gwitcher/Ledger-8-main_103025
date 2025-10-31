@@ -3,6 +3,7 @@
 //  Ledger 8
 //
 //  Created by Gabe Witcher on 4/24/25.
+//  Updated: 10/30/25 - Migrated to use InvoiceService and ProjectService
 //
 
 import SwiftUI
@@ -19,11 +20,11 @@ struct AddInvoiceView: View {
     
     
     var body: some View {
-        let nextInvoiceNumber = project.nextInvoiceNumber(projects: projects, defaultInvoiceNumber: initialInvoiceNumber)
+        let nextInvoiceNumber = ProjectService.nextInvoiceNumber(projects: projects, defaultInvoiceNumber: initialInvoiceNumber)
         
             Button {
                 
-                let newInvoice = project.renderInvoice(project: project, invoiceNumber: nextInvoiceNumber)
+                let newInvoice = InvoiceService.renderInvoice(project: project, invoiceNumber: nextInvoiceNumber)
                 print("\(newInvoice.url?.absoluteString ?? "No URL")")
                 saveInvoice(newInvoice: newInvoice)
                 

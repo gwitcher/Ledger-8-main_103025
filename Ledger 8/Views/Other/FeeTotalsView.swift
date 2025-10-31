@@ -1,8 +1,9 @@
 //
-//  QuerryOpenView.swift
+//  FeeTotalsView.swift (formerly QuerryOpenView.swift)
 //  Ledger 7
 //
 //  Created by Gabe Witcher on 4/10/25.
+//  Updated: 10/30/25 - Migrated to use ProjectService
 //
 
 import SwiftUI
@@ -35,9 +36,9 @@ struct FeeTotalsView: View {
         
         
         HStack {
-            let openTotal = projectsFeeTotal(projects: projectsOpen)
-            let invoicedTotal = projectsFeeTotal(projects: projectsInvoiced)
-            let closedTotal = projectsFeeTotal(projects: projectsClosed)
+            let openTotal = ProjectService.projectsFeeTotal(projects: projectsOpen)
+            let invoicedTotal = ProjectService.projectsFeeTotal(projects: projectsInvoiced)
+            let closedTotal = ProjectService.projectsFeeTotal(projects: projectsClosed)
             
             VStack (alignment: .leading, spacing: 8) {
                 Group {
@@ -63,7 +64,7 @@ struct FeeTotalsView: View {
                 .minimumScaleFactor(0.5)
                 .padding(.horizontal)
                 
-                Text("\(projectsFeeTotal(projects: projects).formatted(.currency(code: "USD")))")
+                Text("\(ProjectService.projectsFeeTotal(projects: projects).formatted(.currency(code: "USD")))")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundStyle(sortSelection.statusColor)
@@ -124,13 +125,8 @@ struct FeeTotalsView: View {
         
     }
     
-    func projectsFeeTotal(projects: [Project]) -> Double {
-        var projectTotal = 0.0
-        for project in projects {
-            projectTotal += project.calculateFeeTotal(items: project.items!)
-        }
-        return projectTotal
-    }
+    // MARK: - Removed local projectsFeeTotal method
+    // Now using ProjectService.projectsFeeTotal(projects:) instead
 }
 #Preview {
     FeeTotalsView(sortSelection: Status.open)

@@ -127,7 +127,7 @@ struct IncomeByMonthView: View {
             }
             
             let mediaType = project.mediaType
-            let fee = project.calculateFeeTotal(items: project.items ?? [])
+            let fee = ProjectService.calculateFeeTotal(items: project.items ?? [])
             
             if timePeriodTotals[periodKey] == nil {
                 timePeriodTotals[periodKey] = [:]
@@ -194,7 +194,7 @@ struct IncomeByMonthView: View {
                 periodKey = calendar.monthYearKey(for: projectDate)
             }
             
-            let fee = project.calculateFeeTotal(items: project.items ?? [])
+            let fee = ProjectService.calculateFeeTotal(items: project.items ?? [])
             timePeriodTotals[periodKey, default: 0] += fee
         }
         

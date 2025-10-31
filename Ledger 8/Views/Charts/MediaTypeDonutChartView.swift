@@ -42,7 +42,7 @@ struct MediaTypeDonutChartView: View {
         let closedProjects = projects.filter { $0.status == .closed }
         let grouped = Dictionary(grouping: closedProjects, by: { $0.mediaType })
         return grouped.map { (mediaType, projects) in
-            let sum = projects.reduce(0.0) { $0 + $1.calculateFeeTotal(items: $1.items ?? []) }
+            let sum = projects.reduce(0.0) { $0 + ProjectService.calculateFeeTotal(items: $1.items ?? []) }
             return MediaTypeTotal(id: mediaType, mediaType: mediaType, totalFee: sum)
         }
         .filter { $0.totalFee > 0 }
@@ -50,7 +50,7 @@ struct MediaTypeDonutChartView: View {
     }
     
     func totalFee(project: [Project]) -> Double {
-        project.reduce(0.0) { $0 + $1.calculateFeeTotal(items: $1.items ?? []) }
+        project.reduce(0.0) { $0 + ProjectService.calculateFeeTotal(items: $1.items ?? []) }
     }
     
     @State private var lastSelectedMediaType: MediaTypeTotal? = nil
