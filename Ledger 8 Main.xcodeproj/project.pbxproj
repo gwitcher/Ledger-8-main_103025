@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		660910C82EB57D6900D1EEEC /* PROJECT_DETAIL_VIEW_REFACTORING_PLAN.md in Resources */ = {isa = PBXBuildFile; fileRef = 660910C72EB57D6900D1EEEC /* PROJECT_DETAIL_VIEW_REFACTORING_PLAN.md */; };
 		660EDF892EB408FF007A6895 /* ARCHITECTURE_REFERENCE.md in Resources */ = {isa = PBXBuildFile; fileRef = 660EDF882EB408FF007A6895 /* ARCHITECTURE_REFERENCE.md */; };
 		660EDF8B2EB41421007A6895 /* SENIOR_DEVELOPER_REVIEW.md in Resources */ = {isa = PBXBuildFile; fileRef = 660EDF8A2EB41421007A6895 /* SENIOR_DEVELOPER_REVIEW.md */; };
 		660EDF8D2EB41802007A6895 /* DataBackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660EDF8C2EB41802007A6895 /* DataBackupService.swift */; };
@@ -40,6 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		660910C72EB57D6900D1EEEC /* PROJECT_DETAIL_VIEW_REFACTORING_PLAN.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PROJECT_DETAIL_VIEW_REFACTORING_PLAN.md; sourceTree = "<group>"; };
 		660EDF882EB408FF007A6895 /* ARCHITECTURE_REFERENCE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ARCHITECTURE_REFERENCE.md; sourceTree = "<group>"; };
 		660EDF8A2EB41421007A6895 /* SENIOR_DEVELOPER_REVIEW.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SENIOR_DEVELOPER_REVIEW.md; sourceTree = "<group>"; };
 		660EDF8C2EB41802007A6895 /* DataBackupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBackupService.swift; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 			children = (
 				662222EE2E9792CE00AC1315 /* .gitignore */,
 				660EDF882EB408FF007A6895 /* ARCHITECTURE_REFERENCE.md */,
+				660910C72EB57D6900D1EEEC /* PROJECT_DETAIL_VIEW_REFACTORING_PLAN.md */,
 				660EDF8A2EB41421007A6895 /* SENIOR_DEVELOPER_REVIEW.md */,
 				66C6162B2DAF2BA100161D7E /* Ledger 8 */,
 				660EDF9F2EB43C6A007A6895 /* Ledger 8Tests */,
@@ -297,6 +300,7 @@
 				660EDF892EB408FF007A6895 /* ARCHITECTURE_REFERENCE.md in Resources */,
 				66C6162C2DAF2BA100161D7E /* Preview Assets.xcassets in Resources */,
 				66C6162D2DAF2BA100161D7E /* Assets.xcassets in Resources */,
+				660910C82EB57D6900D1EEEC /* PROJECT_DETAIL_VIEW_REFACTORING_PLAN.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
