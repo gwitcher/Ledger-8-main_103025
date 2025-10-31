@@ -37,9 +37,7 @@ struct ValidationSummaryBanner: View {
                     VStack(alignment: .leading, spacing: 4) {
                         ForEach(validationErrors, id: \.id) { error in
                             HStack {
-                                Image(systemName: error.icon)
-                                    .frame(width: 16)
-                                    .foregroundColor(.secondary)
+                                ValidationBulletPoint()
                                 Text("\(error.fieldName): \(error.message)")
                                     .font(.caption)
                                     .foregroundColor(.secondary)

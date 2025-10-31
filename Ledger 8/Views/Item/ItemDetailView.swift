@@ -40,7 +40,7 @@ struct ItemDetailView: View {
         var errors: [ValidationBannerError] = []
         
         if let nameError = nameValidationError {
-            errors.append(ValidationBannerError(fieldName: "Item Name", message: nameError, icon: "doc.text"))
+            errors.append(ValidationBannerError(fieldName: "Item Name", message: nameError, icon: "circle.fill"))
         }
         
         return errors

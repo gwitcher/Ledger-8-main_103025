@@ -20,6 +20,7 @@
 		665514782EB46A530006F0EE /* ExtensionsViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 665514772EB46A530006F0EE /* ExtensionsViewExtensions.swift */; };
 		6655147A2EB46A570006F0EE /* ExtensionsProjectExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 665514792EB46A570006F0EE /* ExtensionsProjectExtensions.swift */; };
 		6660F3962E9B2880007AA17D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6660F3952E9B2880007AA17D /* OnboardingView.swift */; };
+		669973662EB51B360050D124 /* ValidationSummaryBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669973652EB51B360050D124 /* ValidationSummaryBanner.swift */; };
 		66C6162C2DAF2BA100161D7E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66C616242DAF2BA100161D7E /* Preview Assets.xcassets */; };
 		66C6162D2DAF2BA100161D7E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66C616262DAF2BA100161D7E /* Assets.xcassets */; };
 		66C6162E2DAF2BA100161D7E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C616272DAF2BA100161D7E /* ContentView.swift */; };
@@ -54,6 +55,7 @@
 		665514772EB46A530006F0EE /* ExtensionsViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsViewExtensions.swift; sourceTree = "<group>"; };
 		665514792EB46A570006F0EE /* ExtensionsProjectExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsProjectExtensions.swift; sourceTree = "<group>"; };
 		6660F3952E9B2880007AA17D /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		669973652EB51B360050D124 /* ValidationSummaryBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationSummaryBanner.swift; sourceTree = "<group>"; };
 		66C6160F2DAF2B2E00161D7E /* Ledger 8.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Ledger 8.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		66C616242DAF2BA100161D7E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		66C616262DAF2BA100161D7E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				660EE0542EB46550007A6895 /* LedgerError.swift */,
 				660EE0522EB4653B007A6895 /* ValidationHelper.swift */,
 				665514182EB468DD0006F0EE /* ValidationErrorAlert.swift */,
+				669973652EB51B360050D124 /* ValidationSummaryBanner.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 				6655147A2EB46A570006F0EE /* ExtensionsProjectExtensions.swift in Sources */,
 				660EDFEB2EB453EE007A6895 /* Extensions.swift in Sources */,
 				660EE0552EB46550007A6895 /* LedgerError.swift in Sources */,
+				669973662EB51B360050D124 /* ValidationSummaryBanner.swift in Sources */,
 				660EE0532EB4653B007A6895 /* ValidationHelper.swift in Sources */,
 				66C6162E2DAF2BA100161D7E /* ContentView.swift in Sources */,
 				660EDF8D2EB41802007A6895 /* DataBackupService.swift in Sources */,

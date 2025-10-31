@@ -66,7 +66,7 @@ struct NewClientView: View {
             errors.append(.phone(phoneError))
         }
         if let nameError = nameValidationError {
-            errors.append(ValidationBannerError(fieldName: "Name or Company", message: nameError, icon: "person"))
+            errors.append(ValidationBannerError(fieldName: "Name or Company", message: nameError, icon: "circle.fill"))
         }
         
         return errors
