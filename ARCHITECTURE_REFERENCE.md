@@ -47,12 +47,12 @@ Senior developer recommends **Phase 0** completion within 1 week before any feat
 - `ContentView.swift` - Root navigation view, displays ProjectListView
 - `.gitignore` - Xcode/Swift project gitignore configuration
 
-### **📊 Data Models (`Models/` folder)**
-- `Project.swift` - Core project entity with status lifecycle, dates, relationships, and suggestion scoring
-- `Client.swift` - Contact management (personal, company, address info)  
-- `Item.swift` - Billable services/items with fees and ItemType categorization
-- `Invoice.swift` - PDF invoice generation with URL storage and numbering
-- `User.swift` - UserData struct for app settings (Company, BankingInfo, user details)
+### **📊 Data Models**
+- `Project.swift` - Core project entity with status lifecycle, dates, relationships, and suggestion scoring (100 lines)
+- `Client.swift` - Contact management (personal, company, address info) (105 lines)  
+- `Item.swift` - Billable services/items with fees and ItemType categorization (70 lines)
+- `Invoice.swift` - PDF invoice generation with URL storage and numbering (24 lines)
+- `User.swift` - UserData struct for app settings (Company, BankingInfo, user details) (92 lines)
 
 ### **🎯 Enums & Types**
 - `Enums.swift` - All app enums:
@@ -61,18 +61,32 @@ Senior developer recommends **Phase 0** completion within 1 week before any feat
   - `ItemType` - Billable service types (Session, Overdub, Concert, Arrangement, etc.)
   - `ProjectField`, `ItemField`, `clientField`, `userField`, `bankField` - Focus state management
 
+### **🏗️ Service Layer** *(Phase 0 Implementation)*
+- `ServicesProjectService.swift` - Centralized project business logic and calculations (31 lines)
+- `ServicesInvoiceService.swift` - PDF generation and invoice handling services (58 lines)
+
+### **🔧 Extensions & Utilities**
+- `Extensions.swift` - Central import point and legacy support with deprecated methods (44 lines)
+- `ExtensionsProjectExtensions.swift` - Project model convenience methods (22 lines)
+- `ExtensionsDateExtensions.swift` - Date utility methods (20 lines)
+- `DataBackupService.swift` - Data export service for JSON/CSV backup (new)
+
+### **⚠️ Error Handling & Validation** *(Phase 0 Implementation)*
+- `LedgerError.swift` - Centralized error handling with localized descriptions (110 lines)
+- `ValidationErrorAlert.swift` - User-facing error alert components (74 lines)
+
 ### **🎨 UI Views - Project Management**
-- `ProjectListView.swift` - Main dashboard with project filtering by status
-- `ProjectDetailView.swift` - Full project creation/editing form (871 lines)
-- `ProjectView.swift` - Individual project card display
-- `SortedProjectView.swift` - Filtered project lists with swipe actions and monthly grouping
+- `ProjectListView.swift` - Main dashboard with project filtering by status (130 lines)
+- `ProjectDetailView.swift` - Full project creation/editing form with validation (909 lines)
+- `ProjectView.swift` - Individual project card display (80 lines)
+- `SortedProjectView.swift` - Filtered project lists with swipe actions and monthly grouping (124 lines)
 - `MarkedForDeletionView.swift` - Dedicated view for projects pending deletion (planned)
 - `ProjectSuggestionsView.swift` - Smart project suggestions with hide/unhide functionality (planned)
 
 ### **👥 UI Views - Client Management**  
 - `ClientListView.swift` - Client directory with search/management
 - `ClientSelectView.swift` - Client picker for projects
-- `NewClientView.swift` - Client creation form (265 lines)
+- `NewClientView.swift` - Client creation form with validation (298 lines)
 - `ClientInfoView.swift` - Read-only client information display (planned)
 - `ClientDashboardView.swift` - Client project history and analytics (planned)
 - `PayerView.swift` - Client payment information view
@@ -82,13 +96,13 @@ Senior developer recommends **Phase 0** completion within 1 week before any feat
 - `ItemListView2.swift` - Alternative item list implementation  
 - `ItemDetailView.swift` - Item creation/editing form (120 lines)
 - `ItemEditView.swift` - Item modification interface (110 lines)
-- `ItemView.swift` - Individual item display card
+- `ItemView.swift` - Individual item display card (62 lines)
 
 ### **🧾 UI Views - Invoicing**
 - `InvoiceTemplateView.swift` - PDF invoice layout template (104 lines)
-- `InvoiceLinkView.swift` - Invoice file management and sharing
+- `InvoiceLinkView.swift` - Invoice file management and sharing (97 lines)
 - `AddInvoiceView.swift` - Invoice creation interface
-- `ShowInvoice.swift` - Invoice preview and display
+- `ShowInvoice.swift` - Invoice preview and display (71 lines)
 - `BankingInvoiceView.swift` - Banking info display on invoices
 
 ### **⚙️ UI Views - Settings**
@@ -104,20 +118,26 @@ Senior developer recommends **Phase 0** completion within 1 week before any feat
 - `Charts.swift` - Main analytics dashboard
 - `IncomeByMonthView.swift` - Monthly income visualization (528 lines)
 - `MediaTypeDonutChartView.swift` - Project type breakdown chart (232 lines)
-- `FeeTotalsView.swift` - Status-based fee summaries
+- `FeeTotalsView.swift` - Status-based fee summaries (134 lines)
 
 ### **🚀 UI Views - Onboarding & Misc**
 - `OnboardingView.swift` - First-run setup experience (245 lines)
 - `Onboarding.swift` - Additional onboarding components (571 lines)
 - `MainView.swift` - Alternative main view implementation
+- `CustomPickerView.swift` - Reusable picker component (50 lines)
 
-### **🔧 Utilities & Extensions**
-- `Extensions.swift` - Project calculations, invoice generation, Date helpers, View extensions (103 lines)
-- `DataBackupService.swift` - Data export service for JSON/CSV backup (new)
+### **🧪 Testing Infrastructure** *(Phase 0 - In Progress)*
+- `Tests/ProjectServiceTests.swift` - Unit tests for project calculations and business logic (planned)
+- `Tests/InvoiceServiceTests.swift` - Unit tests for invoice generation (planned)
+- `Tests/FormValidationTests.swift` - Tests for data validation (planned)
+- `Tests/UITests/ProjectCreationTests.swift` - UI tests for critical workflows (planned)
 
-### **📋 Documentation**
+### **📋 Documentation & Migration**
+- `ARCHITECTURE_REFERENCE.md` - This comprehensive architecture document (567 lines)
+- `SENIOR_DEVELOPER_REVIEW.md` - Code review findings and implementation plan (310 lines)
+- `MIGRATION_SUMMARY.md` - Service migration status and progress (83 lines)
 - `DevelopmentSuggestions.md` - Development roadmap and improvement suggestions (90 lines)
-- `ARCHITECTURE_REFERENCE.md` - This comprehensive architecture document
+- `Doc.md` - Additional documentation (4 lines)
 
 ---
 
@@ -141,19 +161,63 @@ class SwiftDataService: DataServiceProtocol {
 ```
 
 ### **Error Handling Strategy**
-**Current:** Force unwraps and crashes
-**Recommended:** Centralized error management
+**Status:** ✅ **IMPLEMENTED** *(Phase 0 - October 30, 2025)*
+**Previous:** Force unwraps and crashes throughout codebase
+**Current:** Comprehensive centralized error management system
+
+**Implementation Files:**
+- `LedgerError.swift` - Centralized error enum with localized descriptions (110 lines)
+- `ValidationErrorAlert.swift` - User-facing error alert components (74 lines)  
+- `ValidationHelper.swift` - Safe validation utilities preventing crashes (97 lines)
+
+**Key Features Implemented:**
 ```swift
 enum LedgerError: LocalizedError {
     case dataCorruption
-    case networkUnavailable
+    case invalidDateConfiguration
+    case fileNotFound
+    case invalidProjectData
+    case calculationError
     case validationFailed(String)
+    case unexpectedNilValue(String)
+    case invalidDateRange
+    case emptyRequiredField(String)
+    case invalidEmailFormat
+    case invalidPhoneFormat
     
     var errorDescription: String? {
-        // User-friendly error messages
+        // Comprehensive user-friendly error messages
+    }
+    
+    var recoverySuggestion: String? {
+        // Helpful recovery suggestions for each error type
     }
 }
 ```
+
+**Safety Utilities Added:**
+- `ValidationHelper` - Safe validation methods for emails, phone numbers, dates, fees
+- `Calendar.safeDateBySettingTime()` - Replaces force-unwrap date operations
+- `ErrorHandler` - Centralized logging with context information
+- `FormValidationState` - Observable validation state management
+- Safe array operations and fee calculations
+
+**UI Integration:**
+- `ValidationErrorAlert` modifier for consistent error presentation
+- `FormValidationState` class for reactive form validation
+- Alert system with error descriptions and recovery suggestions
+
+**Migration Status:**
+- ✅ Core error handling infrastructure complete
+- ✅ Safe date operations implemented
+- ✅ Validation utilities operational
+- ⚠️ Legacy force unwraps still present in some views (ongoing P0 work)
+- 🔄 Service layer integration in progress
+
+**Next Steps:**
+- Continue replacing remaining force unwraps in views
+- Integrate validation helpers into form components
+- Add comprehensive error logging throughout app
 
 ### **View Decomposition Pattern**
 **Current:** Monolithic views (ProjectDetailView: 871 lines)
@@ -418,8 +482,9 @@ class ProjectSuggestionsService {
 
 ## 🛣️ **Revised Development Roadmap** *(Incorporating Senior Developer Review)*
 
-### **Phase 0: Critical Foundation (1 week) - IMMEDIATE**
+### **Phase 0: Critical Foundation (1 week) - CURRENT FOCUS**
 **Priority: P0 (Blocking) - Must complete before any feature work**
+**Start Date: October 30, 2025**
 
 **Week 1: Production Safety**
 - **Day 1-2: Error Handling Audit**

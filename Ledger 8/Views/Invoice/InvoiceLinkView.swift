@@ -37,8 +37,10 @@ struct InvoiceLinkView: View {
             }
             .swipeActions {
                 Button("Delete", role: .destructive) {
-                    deletePdf(invoice: project.invoice!)
-                    project.invoice = nil
+                    if let invoice = project.invoice {
+                        deletePdf(invoice: invoice)
+                        project.invoice = nil
+                    }
                 }
                 
                 
@@ -47,7 +49,7 @@ struct InvoiceLinkView: View {
                 print("\(path ?? "No URL")")
             }
             .sheet(isPresented: $invoiceSheetIsPresented) {
-                if let pdfURL = project.invoice?.url! {
+                if let invoice = project.invoice, let pdfURL = invoice.url {
                     //ShowInvoice(pdfURL: url, pdfTitle: project.invoice!.name)
                     NavigationStack {
                         VStack{

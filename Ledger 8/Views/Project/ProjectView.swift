@@ -48,7 +48,7 @@ struct ProjectView: View {
             
             VStack (alignment: .trailing, spacing: 6) {
               
-                Text("\(project.calculateFeeTotal(items: project.items!).formatted(.currency(code: "USD")))")
+                Text("\(project.calculateFeeTotal(items: project.items ?? []).formatted(.currency(code: "USD")))")
                     .font(.subheadline)
                     .foregroundStyle(project.status.statusColor)
                     .bold()
