@@ -67,6 +67,26 @@ struct ProjectDetailView: View {
                clientValidationError != nil
     }
     
+    /// Current validation errors for display in banner
+    private var currentValidationErrors: [ValidationBannerError] {
+        var errors: [ValidationBannerError] = []
+        
+        if let projectError = projectNameValidationError {
+            errors.append(.projectName(projectError))
+        }
+        if let dateError = dateRangeValidationError {
+            errors.append(.dateRange(dateError))
+        }
+        if let artistError = artistValidationError {
+            errors.append(.artist(artistError))
+        }
+        if let clientError = clientValidationError {
+            errors.append(.client(clientError))
+        }
+        
+        return errors
+    }
+    
     /// Auto-hide validation summary when errors are resolved
     private func checkAndHideValidationSummary() {
         if showValidationSummary && !hasValidationErrors {
@@ -137,7 +157,11 @@ struct ProjectDetailView: View {
         NavigationStack {
             ScrollViewReader { proxy in
                 List {
-                    validationSummaryBanner
+                    ValidationSummaryBanner(
+                        title: "Please complete required fields:",
+                        validationErrors: currentValidationErrors,
+                        isVisible: $showValidationSummary
+                    )
                     clientSection
                     projectInfoSection
                     mediaSection
@@ -194,61 +218,6 @@ struct ProjectDetailView: View {
     }
     
     // MARK: - View Components
-    
-    @ViewBuilder
-    private var validationSummaryBanner: some View {
-        if showValidationSummary && hasValidationErrors {
-            Section {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Image(systemName: "info.circle.fill")
-                            .foregroundColor(.blue)
-                        Text("Please complete required fields:")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Spacer()
-                        Button {
-                            withAnimation(.easeOut(duration: 0.3)) {
-                                showValidationSummary = false
-                            }
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        if projectNameValidationError != nil {
-                            Text("• Project name")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        if clientValidationError != nil {
-                            Text("• Client selection")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        if dateRangeValidationError != nil {
-                            Text("• Valid date range")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        if artistValidationError != nil {
-                            Text("• Artist name (if provided)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-                .padding()
-                .background(.blue.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .listRowInsets(EdgeInsets())
-            .listRowBackground(Color.clear)
-            .id("validationBanner")
-        }
-    }
     
     @ViewBuilder
     private var clientSection: some View {

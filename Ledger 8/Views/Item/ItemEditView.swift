@@ -18,7 +18,37 @@ struct ItemEditView: View {
     @State private var itemType = ItemType.overdub
     @State private var fee = Double("")
     @State private var notes = ""
-    @State private var showValidationBanner = false
+    @State private var showValidationSummary = false
+    
+    // MARK: - Validation State
+    @State private var nameValidationError: String?
+    
+    // MARK: - Computed Properties
+    
+    /// Checks if there are any validation errors
+    private var hasValidationErrors: Bool {
+        return nameValidationError != nil
+    }
+    
+    /// Current validation errors for display in banner
+    private var currentValidationErrors: [ValidationBannerError] {
+        var errors: [ValidationBannerError] = []
+        
+        if let nameError = nameValidationError {
+            errors.append(ValidationBannerError(fieldName: "Item Name", message: nameError, icon: "doc.text"))
+        }
+        
+        return errors
+    }
+    
+    /// Auto-hide validation summary when errors are resolved
+    private func checkAndHideValidationSummary() {
+        if showValidationSummary && !hasValidationErrors {
+            withAnimation(.easeOut(duration: 0.3)) {
+                showValidationSummary = false
+            }
+        }
+    }
     
     
     @FocusState private var isFocused: Bool
@@ -43,31 +73,11 @@ struct ItemEditView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 // Validation Banner
-                if showValidationBanner {
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack {
-                            Image(systemName: "info.circle.fill")
-                                .foregroundColor(.blue)
-                            Text("Please enter an item name before saving")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            Spacer()
-                            Button {
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    showValidationBanner = false
-                                }
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(.blue.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-                }
+                ValidationSummaryBanner(
+                    title: "Please complete required fields:",
+                    validationErrors: currentValidationErrors,
+                    isVisible: $showValidationSummary
+                )
                 
                 Form {
                 Section("Item Info") {
@@ -77,14 +87,13 @@ struct ItemEditView: View {
                             .submitLabel(.next)
                             .focused($focusField, equals: .itemName)
                             .onSubmit {
-                                focusField = .fee
+                                moveToNextField(.fee)
                             }
                             .onChange(of: name) {
                                 // Dismiss banner if name is no longer empty
-                                if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && showValidationBanner {
-                                    withAnimation(.easeOut(duration: 0.3)) {
-                                        showValidationBanner = false
-                                    }
+                                if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                    nameValidationError = nil
+                                    checkAndHideValidationSummary()
                                 }
                             }
                     }   label: {
@@ -131,8 +140,9 @@ struct ItemEditView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done", systemImage: "checkmark.circle.fill") {
                         if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            nameValidationError = "Item name is required"
                             withAnimation(.easeIn(duration: 0.3)) {
-                                showValidationBanner = true
+                                showValidationSummary = true
                             }
                             return
                         }
@@ -144,6 +154,13 @@ struct ItemEditView: View {
                     }
                 }
             }
+        }
+    }
+    
+    /// Smoothly transitions focus to the next field to prevent keyboard flickering
+    private func moveToNextField(_ nextField: ItemField) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            focusField = nextField
         }
     }
     

@@ -26,6 +26,9 @@ struct NewClientView: View {
     @State private var emailHasBeenFocused = false
     @State private var phoneHasBeenFocused = false
     
+    // MARK: - Validation Summary State
+    @State private var showValidationSummary = false
+    
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var email = ""
@@ -48,9 +51,31 @@ struct NewClientView: View {
         return emailValidationError != nil || phoneValidationError != nil || nameValidationError != nil
     }
     
+    /// Current validation errors for display in banner
+    private var currentValidationErrors: [ValidationBannerError] {
+        var errors: [ValidationBannerError] = []
+        
+        if let emailError = emailValidationError {
+            errors.append(.email(emailError))
+        }
+        if let phoneError = phoneValidationError {
+            errors.append(.phone(phoneError))
+        }
+        if let nameError = nameValidationError {
+            errors.append(ValidationBannerError(fieldName: "Name or Company", message: nameError, icon: "person"))
+        }
+        
+        return errors
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
+                ValidationSummaryBanner(
+                    title: "Please check field formatting:",
+                    validationErrors: currentValidationErrors,
+                    isVisible: $showValidationSummary
+                )
                 Section("Client Info") {
                     if let error = nameValidationError {
                         Text(error)
@@ -66,7 +91,7 @@ struct NewClientView: View {
                             .focused($focusField, equals: .firstName)
                             .submitLabel(.next)
                             .onSubmit {
-                                focusField = .lastName
+                                moveToNextField(.lastName)
                             }
                             .onChange(of: firstName) { _, _ in
                                 validateNameFields()
@@ -84,7 +109,7 @@ struct NewClientView: View {
                             .focused($focusField, equals: .lastName)
                             .submitLabel(.next)
                             .onSubmit {
-                                focusField = .email
+                                moveToNextField(.email)
                             }
                             .onChange(of: lastName) { _, _ in
                                 validateNameFields()
@@ -104,7 +129,7 @@ struct NewClientView: View {
                                 .focused($focusField, equals: .email)
                                 .submitLabel(.next)
                                 .onSubmit {
-                                    focusField = .phone
+                                    moveToNextField(.phone)
                                 }
                                 .onChange(of: email) { _, newValue in
                                     validateEmailField(newValue)
@@ -137,7 +162,7 @@ struct NewClientView: View {
                                 .focused($focusField, equals: .phone)
                                 .submitLabel(.next)
                                 .onSubmit {
-                                    focusField = .company
+                                    moveToNextField(.company)
                                 }
                                 .onChange(of: phone) { _, newValue in
                                     validatePhoneField(newValue)
@@ -170,7 +195,7 @@ struct NewClientView: View {
                             .focused($focusField, equals: .company)
                             .submitLabel(.next)
                             .onSubmit {
-                                focusField = .attn
+                                moveToNextField(.attn)
                             }
                             .onChange(of: company) { _, _ in
                                 validateNameFields()
@@ -190,7 +215,7 @@ struct NewClientView: View {
                             .focused($focusField, equals: .attn)
                             .submitLabel(.next)
                             .onSubmit {
-                                focusField = .address
+                                moveToNextField(.address)
                             }
                         
                     }   label: {
@@ -204,7 +229,7 @@ struct NewClientView: View {
                             .focused($focusField, equals: .address)
                             .submitLabel(.next)
                             .onSubmit {
-                                focusField = .address2
+                                moveToNextField(.address2)
                             }
                         
                     }   label: {
@@ -218,7 +243,7 @@ struct NewClientView: View {
                             .focused($focusField, equals: .address2)
                             .submitLabel(.next)
                             .onSubmit {
-                                focusField = .city
+                                moveToNextField(.city)
                             }
                         
                     }   label: {
@@ -232,7 +257,7 @@ struct NewClientView: View {
                             .focused($focusField, equals: .city)
                             .submitLabel(.next)
                             .onSubmit {
-                                focusField = .state
+                                moveToNextField(.state)
                             }
                         
                     }   label: {
@@ -246,7 +271,7 @@ struct NewClientView: View {
                             .focused($focusField, equals: .state)
                             .submitLabel(.next)
                             .onSubmit {
-                                focusField = .zip
+                                moveToNextField(.zip)
                             }
                     }   label: {
                         Text("State").foregroundStyle(.secondary)
@@ -259,7 +284,7 @@ struct NewClientView: View {
                             .focused($focusField, equals: .zip)
                             .submitLabel(.next)
                             .onSubmit {
-                                focusField = .notes
+                                moveToNextField(.notes)
                             }
                         
                     }   label: {
@@ -283,6 +308,16 @@ struct NewClientView: View {
                     Button("Done", systemImage: "checkmark.circle.fill") {
                         // Run final validation including name requirement
                         validateNameFields()
+                        validateEmailField(email)
+                        validatePhoneField(phone)
+                        
+                        // If there are validation errors, show the summary banner
+                        if hasValidationErrors {
+                            withAnimation(.easeIn(duration: 0.3)) {
+                                showValidationSummary = true
+                            }
+                            return
+                        }
                         
                         if saveClient(firstName: firstName, lastName: lastName, email: email, phone: phone,attention: attention, address: address, address2: address2, city: city, state: state, zip: zip, notes: notes, company: company) {
                             firstName = ""
@@ -313,11 +348,28 @@ struct NewClientView: View {
     
     // MARK: - Real-time Validation Methods
     
+    /// Auto-hide validation summary when errors are resolved
+    private func checkAndHideValidationSummary() {
+        if showValidationSummary && !hasValidationErrors {
+            withAnimation(.easeOut(duration: 0.3)) {
+                showValidationSummary = false
+            }
+        }
+    }
+    
+    /// Smoothly transitions focus to the next field to prevent keyboard flickering
+    private func moveToNextField(_ nextField: clientField) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            focusField = nextField
+        }
+    }
+    
     /// Validates email field in real-time using ValidationHelper
     private func validateEmailField(_ email: String) {
         // Clear error if field is empty (email is optional)
         guard !email.isEmpty else {
             emailValidationError = nil
+            checkAndHideValidationSummary()
             return
         }
         
@@ -327,6 +379,7 @@ struct NewClientView: View {
         } else {
             emailValidationError = "Invalid email format"
         }
+        checkAndHideValidationSummary()
     }
     
     /// Validates phone field in real-time using ValidationHelper
@@ -334,6 +387,7 @@ struct NewClientView: View {
         // Clear error if field is empty (phone is optional)
         guard !phone.isEmpty else {
             phoneValidationError = nil
+            checkAndHideValidationSummary()
             return
         }
         
@@ -343,6 +397,7 @@ struct NewClientView: View {
         } else {
             phoneValidationError = "Invalid phone number format"
         }
+        checkAndHideValidationSummary()
     }
     
     /// Validates that at least name or company is provided
@@ -355,6 +410,7 @@ struct NewClientView: View {
         } else {
             nameValidationError = nil
         }
+        checkAndHideValidationSummary()
     }
     
     private func saveClient(firstName: String, lastName: String, email: String, phone: String, attention: String, address: String, address2: String, city: String, state: String, zip: String, notes: String, company: String) -> Bool {

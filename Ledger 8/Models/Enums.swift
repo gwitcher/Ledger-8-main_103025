@@ -102,3 +102,24 @@ enum userField {
 enum bankField {
     case bank, accountName, routing, account, zelle, venmo
 }
+
+enum CompanyField: CaseIterable {
+    case companyName
+    case contact
+    case email
+    case phone
+    case address
+    case address2
+    case city
+    case state
+    case zip
+}
+
+enum BankingField: CaseIterable {
+    case bank
+    case accountName
+    case routingNumber
+    case accountNumber
+    case venmo
+    case zelle
+}
