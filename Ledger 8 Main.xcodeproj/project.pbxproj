@@ -21,6 +21,7 @@
 		6655147A2EB46A570006F0EE /* ExtensionsProjectExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 665514792EB46A570006F0EE /* ExtensionsProjectExtensions.swift */; };
 		6660F3962E9B2880007AA17D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6660F3952E9B2880007AA17D /* OnboardingView.swift */; };
 		669973662EB51B360050D124 /* ValidationSummaryBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669973652EB51B360050D124 /* ValidationSummaryBanner.swift */; };
+		6699736A2EB53FD10050D124 /* PhoneNumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669973692EB53FD00050D124 /* PhoneNumberFormatter.swift */; };
 		66C6162C2DAF2BA100161D7E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66C616242DAF2BA100161D7E /* Preview Assets.xcassets */; };
 		66C6162D2DAF2BA100161D7E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66C616262DAF2BA100161D7E /* Assets.xcassets */; };
 		66C6162E2DAF2BA100161D7E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C616272DAF2BA100161D7E /* ContentView.swift */; };
@@ -56,6 +57,7 @@
 		665514792EB46A570006F0EE /* ExtensionsProjectExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsProjectExtensions.swift; sourceTree = "<group>"; };
 		6660F3952E9B2880007AA17D /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		669973652EB51B360050D124 /* ValidationSummaryBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationSummaryBanner.swift; sourceTree = "<group>"; };
+		669973692EB53FD00050D124 /* PhoneNumberFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumberFormatter.swift; sourceTree = "<group>"; };
 		66C6160F2DAF2B2E00161D7E /* Ledger 8.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Ledger 8.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		66C616242DAF2BA100161D7E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		66C616262DAF2BA100161D7E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 				66C6162B2DAF2BA100161D7E /* Ledger 8 */,
 				660EDF9F2EB43C6A007A6895 /* Ledger 8Tests */,
 				66C616102DAF2B2E00161D7E /* Products */,
+				669973692EB53FD00050D124 /* PhoneNumberFormatter.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -313,6 +316,7 @@
 			files = (
 				665514722EB46A3D0006F0EE /* ServicesProjectService.swift in Sources */,
 				665514762EB46A4F0006F0EE /* ExtensionsDateExtensions.swift in Sources */,
+				6699736A2EB53FD10050D124 /* PhoneNumberFormatter.swift in Sources */,
 				665514782EB46A530006F0EE /* ExtensionsViewExtensions.swift in Sources */,
 				665514742EB46A480006F0EE /* ServicesInvoiceService.swift in Sources */,
 				6655141F2EB468DD0006F0EE /* ValidationErrorAlert.swift in Sources */,

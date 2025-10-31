@@ -225,13 +225,19 @@ struct ClientEditView: View {
                             TextField("", text: $phone)
                                 .autocorrectionDisabled()
                                 .textContentType(.telephoneNumber)
+                                .keyboardType(.phonePad)
                                 .focused($focusField, equals: .phone)
                                 .submitLabel(.next)
                                 .onSubmit {
                                     moveToNextField(.company)
                                 }
                                 .onChange(of: phone) { _, newValue in
-                                    validatePhoneField(newValue)
+                                    // Auto-format phone number as user types
+                                    let formattedPhone = PhoneNumberFormatter.formatAsTyping(newValue)
+                                    if formattedPhone != newValue {
+                                        phone = formattedPhone
+                                    }
+                                    validatePhoneField(formattedPhone)
                                 }
                                 .onChange(of: focusField) { oldValue, newValue in
                                     // Track when phone field has been focused
@@ -241,6 +247,13 @@ struct ClientEditView: View {
                                     // Show triangle when user leaves field with validation error
                                     if oldValue == .phone && newValue != .phone && phoneHasBeenFocused && phoneValidationError != nil {
                                         showPhoneTriangle = true
+                                    }
+                                    // When leaving the phone field, apply final formatting
+                                    if oldValue == .phone && newValue != .phone {
+                                        let finalFormatted = PhoneNumberFormatter.validateAndFormat(phone)
+                                        if finalFormatted != phone {
+                                            phone = finalFormatted
+                                        }
                                     }
                                 }
                             

@@ -31,7 +31,7 @@ struct ItemListView2: View {
             VStack {
                 //HStack{
                 
-                Text("Total: \(project.calculateFeeTotal(items: project.items ?? []).formatted(.currency(code: "USD")))")
+                Text("Total: \(ProjectService.calculateFeeTotal(items: project.items ?? []).formatted(.currency(code: "USD")))")
                 
                 //}
                     .padding(20)

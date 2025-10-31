@@ -135,7 +135,7 @@ struct CompanyInfoView: View {
                         HStack {
                             TextField("(555) 123-4567", text: $userData.company.phone)
                                 .autocorrectionDisabled()
-                                .keyboardType(.numbersAndPunctuation)
+                                .keyboardType(.phonePad)
                                 .textContentType(.telephoneNumber)
                                 .focused($focusedField, equals: .phone)
                                 .submitLabel(.next)
@@ -143,11 +143,23 @@ struct CompanyInfoView: View {
                                     moveToNextField(.address)
                                 }
                                 .onChange(of: userData.company.phone) { _, newValue in
-                                    validatePhoneField(newValue)
+                                    // Auto-format phone number as user types
+                                    let formattedPhone = PhoneNumberFormatter.formatAsTyping(newValue)
+                                    if formattedPhone != newValue {
+                                        userData.company.phone = formattedPhone
+                                    }
+                                    validatePhoneField(formattedPhone)
                                 }
-                                .onChange(of: focusedField) { _, newValue in
+                                .onChange(of: focusedField) { oldValue, newValue in
                                     if newValue == .phone {
                                         phoneHasBeenFocused = true
+                                    }
+                                    // When leaving the phone field, apply final formatting
+                                    if oldValue == .phone && newValue != .phone {
+                                        let finalFormatted = PhoneNumberFormatter.validateAndFormat(userData.company.phone)
+                                        if finalFormatted != userData.company.phone {
+                                            userData.company.phone = finalFormatted
+                                        }
                                     }
                                 }
                             

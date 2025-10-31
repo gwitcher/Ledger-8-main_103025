@@ -84,7 +84,7 @@ struct InvoiceAndFee: View {
                 //No Action
             } label: {
                 if let items = project.items {
-                    Text("Due: \(project.calculateFeeTotal(items: items).formatted(.currency(code: "USD")))")
+                    Text("Due: \(ProjectService.calculateFeeTotal(items: items).formatted(.currency(code: "USD")))")
                     
                 } else {
                     Text("Due: $0.00")

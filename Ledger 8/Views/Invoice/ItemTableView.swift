@@ -75,7 +75,7 @@ struct ItemTableView: View {
                     GridRow {
                         Text("")
                         Text("")
-                        Text("Total:  \(project.calculateFeeTotal(items: project.items!).formatted(.currency(code: "USD")))")
+                        Text("Total:  \(ProjectService.calculateFeeTotal(items: project.items ?? []).formatted(.currency(code: "USD")))")
                             .font(.subheadline)
                             .bold()
                     }
