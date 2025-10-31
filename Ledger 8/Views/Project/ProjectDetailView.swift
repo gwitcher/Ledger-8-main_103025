@@ -54,6 +54,9 @@ struct ProjectDetailView: View {
     @State private var showEndTimePicker = false
     @State private var scrollProxy: ScrollViewProxy?
     
+    // MARK: - Validation Summary State
+    @State private var showValidationSummary = false
+    
     // MARK: - Computed Properties
     
     /// Checks if there are any real-time validation errors
@@ -62,6 +65,15 @@ struct ProjectDetailView: View {
                dateRangeValidationError != nil || 
                artistValidationError != nil || 
                clientValidationError != nil
+    }
+    
+    /// Auto-hide validation summary when errors are resolved
+    private func checkAndHideValidationSummary() {
+        if showValidationSummary && !hasValidationErrors {
+            withAnimation(.easeOut(duration: 0.3)) {
+                showValidationSummary = false
+            }
+        }
     }
     
     @FocusState private var focusField: ProjectField?
@@ -125,6 +137,7 @@ struct ProjectDetailView: View {
         NavigationStack {
             ScrollViewReader { proxy in
                 List {
+                    validationSummaryBanner
                     clientSection
                     projectInfoSection
                     mediaSection
@@ -183,8 +196,62 @@ struct ProjectDetailView: View {
     // MARK: - View Components
     
     @ViewBuilder
+    private var validationSummaryBanner: some View {
+        if showValidationSummary && hasValidationErrors {
+            Section {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Image(systemName: "info.circle.fill")
+                            .foregroundColor(.blue)
+                        Text("Please complete required fields:")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Button("Dismiss") {
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                showValidationSummary = false
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        if projectNameValidationError != nil {
+                            Text("• Project name")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        if clientValidationError != nil {
+                            Text("• Client selection")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        if dateRangeValidationError != nil {
+                            Text("• Valid date range")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        if artistValidationError != nil {
+                            Text("• Artist name (if provided)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding()
+                .background(.blue.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+            .id("validationBanner")
+        }
+    }
+    
+    @ViewBuilder
     private var clientSection: some View {
-        Section("Client") {            
+        Section("Client") {
             if let client = selectedClient {
                 Text(client.fullName)
                     .contentShape(Rectangle())
@@ -210,7 +277,7 @@ struct ProjectDetailView: View {
     
     @ViewBuilder
     private var projectInfoSection: some View {
-        Section("Project Info") {            
+        Section("Project Info") {
             projectNameField
             projectSuggestionsList
             artistField
@@ -649,6 +716,18 @@ struct ProjectDetailView: View {
                 // Run all validations before attempting save
                 validateAllFields()
                 
+                // If there are validation errors, show the summary banner
+                if hasValidationErrors {
+                    withAnimation(.easeIn(duration: 0.3)) {
+                        showValidationSummary = true
+                    }
+                    // Scroll to banner so user can see validation guidance
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        scrollToValidationBanner()
+                    }
+                    return
+                }
+                
                 if endDate < startDate {
                     showAlert.toggle()
                 } else {
@@ -660,8 +739,6 @@ struct ProjectDetailView: View {
                     // The validation alert will be shown via the .validationErrorAlert modifier
                 }
             }
-            .disabled(hasValidationErrors)
-            .foregroundColor(hasValidationErrors ? .gray : .blue)
         }
     }
     
@@ -842,6 +919,14 @@ struct ProjectDetailView: View {
         }
     }
     
+    private func scrollToValidationBanner() {
+        guard let scrollProxy = scrollProxy else { return }
+        
+        withAnimation(.easeInOut(duration: 0.5)) {
+            scrollProxy.scrollTo("validationBanner", anchor: .top)
+        }
+    }
+    
     private func scrollToProjectInfo() {
         guard let scrollProxy = scrollProxy else { return }
         
@@ -936,6 +1021,7 @@ struct ProjectDetailView: View {
         } else {
             projectNameValidationError = "Project name is required"
         }
+        checkAndHideValidationSummary()
     }
     
     /// Validates artist field in real-time using ValidationHelper
@@ -946,6 +1032,7 @@ struct ProjectDetailView: View {
         } else {
             artistValidationError = "Artist name cannot be just whitespace"
         }
+        checkAndHideValidationSummary()
     }
     
     /// Validates date range using ValidationHelper
@@ -955,6 +1042,7 @@ struct ProjectDetailView: View {
         } else {
             dateRangeValidationError = "End date must be after start date"
         }
+        checkAndHideValidationSummary()
     }
     
     /// Validates client selection
@@ -965,6 +1053,7 @@ struct ProjectDetailView: View {
         } else {
             clientValidationError = "Client selection is required"
         }
+        checkAndHideValidationSummary()
     }
     
     /// Runs all validation checks at once
