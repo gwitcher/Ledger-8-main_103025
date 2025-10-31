@@ -22,6 +22,10 @@ struct NewClientView: View {
     @State private var phoneValidationError: String?
     @State private var nameValidationError: String?
     
+    // MARK: - Focus-aware validation tracking
+    @State private var emailHasBeenFocused = false
+    @State private var phoneHasBeenFocused = false
+    
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var email = ""
@@ -48,6 +52,13 @@ struct NewClientView: View {
         NavigationStack {
             Form {
                 Section("Client Info") {
+                    if let error = nameValidationError {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .padding(.bottom, 4)
+                    }
+                    
                     LabeledContent {
                         TextField("", text: $firstName)
                             .autocorrectionDisabled()
@@ -85,18 +96,33 @@ struct NewClientView: View {
                     }
                     
                     LabeledContent {
-                        TextField("", text: $email)
-                            .autocorrectionDisabled()
-                            .textContentType(.emailAddress)
-                            .keyboardType(.emailAddress)
-                            .focused($focusField, equals: .email)
-                            .submitLabel(.next)
-                            .onSubmit {
-                                focusField = .phone
+                        HStack {
+                            TextField("", text: $email)
+                                .autocorrectionDisabled()
+                                .textContentType(.emailAddress)
+                                .keyboardType(.emailAddress)
+                                .focused($focusField, equals: .email)
+                                .submitLabel(.next)
+                                .onSubmit {
+                                    focusField = .phone
+                                }
+                                .onChange(of: email) { _, newValue in
+                                    validateEmailField(newValue)
+                                }
+                                .onChange(of: focusField) { _, newValue in
+                                    // Track when email field has been focused
+                                    if newValue == .email {
+                                        emailHasBeenFocused = true
+                                    }
+                                }
+                            
+                            // Show validation feedback only if field has been focused and user moved on
+                            if emailHasBeenFocused && focusField != .email && emailValidationError != nil && !email.isEmpty {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
                             }
-                            .onChange(of: email) { _, newValue in
-                                validateEmailField(newValue)
-                            }
+                        }
                         
                     }   label: {
                         Text("Email").foregroundStyle(.secondary)
@@ -104,17 +130,32 @@ struct NewClientView: View {
                     }
                     
                     LabeledContent {
-                        TextField("", text: $phone)
-                            .autocorrectionDisabled()
-                            .textContentType(.telephoneNumber)
-                            .focused($focusField, equals: .phone)
-                            .submitLabel(.next)
-                            .onSubmit {
-                                focusField = .company
+                        HStack {
+                            TextField("", text: $phone)
+                                .autocorrectionDisabled()
+                                .textContentType(.telephoneNumber)
+                                .focused($focusField, equals: .phone)
+                                .submitLabel(.next)
+                                .onSubmit {
+                                    focusField = .company
+                                }
+                                .onChange(of: phone) { _, newValue in
+                                    validatePhoneField(newValue)
+                                }
+                                .onChange(of: focusField) { _, newValue in
+                                    // Track when phone field has been focused
+                                    if newValue == .phone {
+                                        phoneHasBeenFocused = true
+                                    }
+                                }
+                            
+                            // Show validation feedback only if field has been focused and user moved on
+                            if phoneHasBeenFocused && focusField != .phone && phoneValidationError != nil && !phone.isEmpty {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
                             }
-                            .onChange(of: phone) { _, newValue in
-                                validatePhoneField(newValue)
-                            }
+                        }
                     }   label: {
                         Text("Phone").foregroundStyle(.secondary)
                             

@@ -22,6 +22,10 @@ struct ClientEditView: View {
     @State private var phoneValidationError: String?
     @State private var nameValidationError: String?
     
+    // MARK: - Focus-aware validation tracking
+    @State private var emailHasBeenFocused = false
+    @State private var phoneHasBeenFocused = false
+    
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var email = ""
@@ -48,6 +52,13 @@ struct ClientEditView: View {
         NavigationStack {
             Form {
                 Section("Client Info") {
+                    if let error = nameValidationError {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .padding(.bottom, 4)
+                    }
+                    
                     LabeledContent {
                         TextField("", text: $firstName)
                             .autocorrectionDisabled()
@@ -84,18 +95,33 @@ struct ClientEditView: View {
                     }
                     
                     LabeledContent {
-                        TextField("", text: $email)
-                            .autocorrectionDisabled()
-                            .textContentType(.emailAddress)
-                            .keyboardType(.emailAddress)
-                            .focused($focusField, equals: .email)
-                            .submitLabel(.next)
-                            .onSubmit {
-                                focusField = .phone
+                        HStack {
+                            TextField("", text: $email)
+                                .autocorrectionDisabled()
+                                .textContentType(.emailAddress)
+                                .keyboardType(.emailAddress)
+                                .focused($focusField, equals: .email)
+                                .submitLabel(.next)
+                                .onSubmit {
+                                    focusField = .phone
+                                }
+                                .onChange(of: email) { _, newValue in
+                                    validateEmailField(newValue)
+                                }
+                                .onChange(of: focusField) { _, newValue in
+                                    // Track when email field has been focused
+                                    if newValue == .email {
+                                        emailHasBeenFocused = true
+                                    }
+                                }
+                            
+                            // Show validation feedback only if field has been focused and user moved on
+                            if emailHasBeenFocused && focusField != .email && emailValidationError != nil && !email.isEmpty {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
                             }
-                            .onChange(of: email) { _, newValue in
-                                validateEmailField(newValue)
-                            }
+                        }
                         
                     }   label: {
                         Text("Email").foregroundStyle(.secondary)
@@ -103,17 +129,32 @@ struct ClientEditView: View {
                     }
                     
                     LabeledContent {
-                        TextField("", text: $phone)
-                            .autocorrectionDisabled()
-                            .textContentType(.telephoneNumber)
-                            .focused($focusField, equals: .phone)
-                            .submitLabel(.next)
-                            .onSubmit {
-                                focusField = .attn
+                        HStack {
+                            TextField("", text: $phone)
+                                .autocorrectionDisabled()
+                                .textContentType(.telephoneNumber)
+                                .focused($focusField, equals: .phone)
+                                .submitLabel(.next)
+                                .onSubmit {
+                                    focusField = .attn
+                                }
+                                .onChange(of: phone) { _, newValue in
+                                    validatePhoneField(newValue)
+                                }
+                                .onChange(of: focusField) { _, newValue in
+                                    // Track when phone field has been focused
+                                    if newValue == .phone {
+                                        phoneHasBeenFocused = true
+                                    }
+                                }
+                            
+                            // Show validation feedback only if field has been focused and user moved on
+                            if phoneHasBeenFocused && focusField != .phone && phoneValidationError != nil && !phone.isEmpty {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
                             }
-                            .onChange(of: phone) { _, newValue in
-                                validatePhoneField(newValue)
-                            }
+                        }
                     }   label: {
                         Text("Phone").foregroundStyle(.secondary)
                             
@@ -243,6 +284,11 @@ struct ClientEditView: View {
                 zip = client.zip
                 notes = client.notes
                 company = client.company
+                
+                // Run initial validation to set up error states
+                validateEmailField(email)
+                validatePhoneField(phone)
+                validateNameFields()
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
