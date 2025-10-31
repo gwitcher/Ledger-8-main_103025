@@ -26,6 +26,10 @@ struct ClientEditView: View {
     @State private var emailHasBeenFocused = false
     @State private var phoneHasBeenFocused = false
     
+    // MARK: - Action-triggered validation indicators
+    @State private var showEmailTriangle = false
+    @State private var showPhoneTriangle = false
+    
     // MARK: - Validation Summary State
     @State private var showValidationSummary = false
     
@@ -43,6 +47,9 @@ struct ClientEditView: View {
     @State private var company = ""
     
     @FocusState private var focusField: clientField?
+    
+    // MARK: - Scroll proxy for auto-scroll to banner
+    @State private var scrollProxy: ScrollViewProxy?
     
     // MARK: - Computed Properties
     
@@ -84,14 +91,24 @@ struct ClientEditView: View {
         }
     }
     
+    /// Scrolls to the validation banner to ensure it's visible
+    private func scrollToValidationBanner() {
+        guard let scrollProxy = scrollProxy else { return }
+        withAnimation(.easeInOut(duration: 0.5)) {
+            scrollProxy.scrollTo("validationBanner", anchor: .top)
+        }
+    }
+    
     var body: some View {
         NavigationStack {
-            Form {
-                ValidationSummaryBanner(
-                    title: "Please check field formatting:",
-                    validationErrors: currentValidationErrors,
-                    isVisible: $showValidationSummary
-                )
+            ScrollViewReader { proxy in
+                Form {
+                    ValidationSummaryBanner(
+                        title: "Please check field formatting:",
+                        validationErrors: currentValidationErrors,
+                        isVisible: $showValidationSummary
+                    )
+                    .id("validationBanner")
                 
                 Section("Client Info") {
                     LabeledContent {
@@ -150,8 +167,8 @@ struct ClientEditView: View {
                                     }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if emailHasBeenFocused && focusField != .email && emailValidationError != nil && !email.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showEmailTriangle || (emailHasBeenFocused && focusField != .email && emailValidationError != nil && !email.isEmpty) {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -183,8 +200,8 @@ struct ClientEditView: View {
                                     }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if phoneHasBeenFocused && focusField != .phone && phoneValidationError != nil && !phone.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showPhoneTriangle || (phoneHasBeenFocused && focusField != .phone && phoneValidationError != nil && !phone.isEmpty) {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -304,9 +321,9 @@ struct ClientEditView: View {
                 Section("Notes") {
                     TextField("Notes", text: $notes, axis: .vertical)
                 }
-                
             }
             .onAppear {
+                scrollProxy = proxy
                 firstName = client.firstName
                 lastName = client.lastName
                 email = client.email
@@ -339,10 +356,22 @@ struct ClientEditView: View {
                         validateEmailField(email)
                         validatePhoneField(phone)
                         
-                        // If there are validation errors, show the summary banner
+                        // If there are validation errors, show the summary banner and triangles
                         if hasValidationErrors {
+                            // Show triangles for fields with errors
+                            if emailValidationError != nil {
+                                showEmailTriangle = true
+                            }
+                            if phoneValidationError != nil {
+                                showPhoneTriangle = true
+                            }
+                            
                             withAnimation(.easeIn(duration: 0.3)) {
                                 showValidationSummary = true
+                            }
+                            // Auto-scroll to banner
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                scrollToValidationBanner()
                             }
                             return
                         }
@@ -358,6 +387,7 @@ struct ClientEditView: View {
                 }
             }
             .validationErrorAlert($validationState.currentError)
+            }
         }
     }
     
@@ -368,6 +398,7 @@ struct ClientEditView: View {
         // Clear error if field is empty (email is optional)
         guard !email.isEmpty else {
             emailValidationError = nil
+            showEmailTriangle = false
             checkAndHideValidationSummary()
             return
         }
@@ -375,6 +406,7 @@ struct ClientEditView: View {
         // Use ValidationHelper to check email format
         if ValidationHelper.isValidEmail(email) {
             emailValidationError = nil
+            showEmailTriangle = false
         } else {
             emailValidationError = "Invalid email format"
         }
@@ -386,6 +418,7 @@ struct ClientEditView: View {
         // Clear error if field is empty (phone is optional)
         guard !phone.isEmpty else {
             phoneValidationError = nil
+            showPhoneTriangle = false
             checkAndHideValidationSummary()
             return
         }
@@ -393,6 +426,7 @@ struct ClientEditView: View {
         // Use ValidationHelper to check phone format
         if ValidationHelper.isValidPhoneNumber(phone) {
             phoneValidationError = nil
+            showPhoneTriangle = false
         } else {
             phoneValidationError = "Invalid phone number format"
         }

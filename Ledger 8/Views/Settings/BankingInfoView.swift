@@ -26,6 +26,12 @@ struct BankingInfoView: View {
     @State private var venmoHasBeenFocused = false
     @State private var zelleHasBeenFocused = false
     
+    // MARK: - Action-triggered validation indicators
+    @State private var showRoutingTriangle = false
+    @State private var showAccountTriangle = false
+    @State private var showVenmoTriangle = false
+    @State private var showZelleTriangle = false
+    
     // MARK: - Validation Summary State
     @State private var showValidationSummary = false
     
@@ -131,8 +137,8 @@ struct BankingInfoView: View {
                                     }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if routingHasBeenFocused && focusedField != .routingNumber && routingValidationError != nil && !userData.bankingInfo.routingNumber.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showRoutingTriangle || (routingHasBeenFocused && focusedField != .routingNumber && routingValidationError != nil && !userData.bankingInfo.routingNumber.isEmpty) {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -163,8 +169,8 @@ struct BankingInfoView: View {
                                     }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if accountHasBeenFocused && focusedField != .accountNumber && accountValidationError != nil && !userData.bankingInfo.accountNumber.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showAccountTriangle || (accountHasBeenFocused && focusedField != .accountNumber && accountValidationError != nil && !userData.bankingInfo.accountNumber.isEmpty) {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -199,8 +205,8 @@ struct BankingInfoView: View {
                                     }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if venmoHasBeenFocused && focusedField != .venmo && venmoValidationError != nil && !userData.bankingInfo.venmo.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showVenmoTriangle || (venmoHasBeenFocused && focusedField != .venmo && venmoValidationError != nil && !userData.bankingInfo.venmo.isEmpty) {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -230,8 +236,8 @@ struct BankingInfoView: View {
                                     }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if zelleHasBeenFocused && focusedField != .zelle && zelleValidationError != nil && !userData.bankingInfo.zelle.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showZelleTriangle || (zelleHasBeenFocused && focusedField != .zelle && zelleValidationError != nil && !userData.bankingInfo.zelle.isEmpty) {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -262,8 +268,22 @@ struct BankingInfoView: View {
                         // Run all validations before attempting to close
                         validateAllFields()
                         
-                        // If there are validation errors, show the summary banner
+                        // If there are validation errors, show the summary banner and triangles
                         if hasValidationErrors {
+                            // Show triangles for fields with errors
+                            if routingValidationError != nil {
+                                showRoutingTriangle = true
+                            }
+                            if accountValidationError != nil {
+                                showAccountTriangle = true
+                            }
+                            if venmoValidationError != nil {
+                                showVenmoTriangle = true
+                            }
+                            if zelleValidationError != nil {
+                                showZelleTriangle = true
+                            }
+                            
                             withAnimation(.easeIn(duration: 0.3)) {
                                 showValidationSummary = true
                             }
@@ -309,6 +329,7 @@ extension BankingInfoView {
         // Clear error if field is empty (routing number is optional)
         guard !routingNumber.isEmpty else {
             routingValidationError = nil
+            showRoutingTriangle = false
             checkAndHideValidationSummary()
             return
         }
@@ -316,6 +337,7 @@ extension BankingInfoView {
         // Use ValidationHelper to check routing number format
         if ValidationHelper.isValidRoutingNumber(routingNumber) {
             routingValidationError = nil
+            showRoutingTriangle = false
         } else {
             routingValidationError = "Must be exactly 9 digits"
         }
@@ -327,6 +349,7 @@ extension BankingInfoView {
         // Clear error if field is empty (account number is optional)
         guard !accountNumber.isEmpty else {
             accountValidationError = nil
+            showAccountTriangle = false
             checkAndHideValidationSummary()
             return
         }
@@ -334,6 +357,7 @@ extension BankingInfoView {
         // Use ValidationHelper to check account number format
         if ValidationHelper.isValidAccountNumber(accountNumber) {
             accountValidationError = nil
+            showAccountTriangle = false
         } else {
             accountValidationError = "Must be 4-20 digits"
         }
@@ -345,6 +369,7 @@ extension BankingInfoView {
         // Clear error if field is empty (Venmo is optional)
         guard !venmoUsername.isEmpty else {
             venmoValidationError = nil
+            showVenmoTriangle = false
             checkAndHideValidationSummary()
             return
         }
@@ -352,6 +377,7 @@ extension BankingInfoView {
         // Use ValidationHelper to check Venmo username format
         if ValidationHelper.isValidVenmoUsername(venmoUsername) {
             venmoValidationError = nil
+            showVenmoTriangle = false
         } else {
             venmoValidationError = "Must start with @ and contain only letters, numbers, hyphens, and underscores"
         }
@@ -363,6 +389,7 @@ extension BankingInfoView {
         // Clear error if field is empty (Zelle is optional)
         guard !zelleInfo.isEmpty else {
             zelleValidationError = nil
+            showZelleTriangle = false
             checkAndHideValidationSummary()
             return
         }
@@ -370,6 +397,7 @@ extension BankingInfoView {
         // Use ValidationHelper to check if it's a valid email or phone number
         if ValidationHelper.isValidZelleInfo(zelleInfo) {
             zelleValidationError = nil
+            showZelleTriangle = false
         } else {
             zelleValidationError = "Must be a valid email address or phone number"
         }

@@ -18,7 +18,12 @@ struct ItemEditView: View {
     @State private var itemType = ItemType.overdub
     @State private var fee = Double("")
     @State private var notes = ""
+    // MARK: - Focus-aware validation tracking
+    @State private var nameHasBeenFocused = false
     @State private var showValidationSummary = false
+    
+    // MARK: - Action-triggered validation indicators
+    @State private var showNameTriangle = false
     
     // MARK: - Validation State
     @State private var nameValidationError: String?
@@ -80,55 +85,71 @@ struct ItemEditView: View {
                 )
                 
                 Form {
-                Section("Item Info") {
-                    LabeledContent {
-                        TextField("Item Name", text: $name)
-                            .textContentType(.name)
-                            .submitLabel(.next)
-                            .focused($focusField, equals: .itemName)
-                            .onSubmit {
-                                moveToNextField(.fee)
-                            }
-                            .onChange(of: name) {
-                                // Dismiss banner if name is no longer empty
-                                if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    nameValidationError = nil
-                                    checkAndHideValidationSummary()
+                    Section("Item Info") {
+                        LabeledContent {
+                            HStack {
+                                TextField("Item Name", text: $name)
+                                    .textContentType(.name)
+                                    .submitLabel(.next)
+                                    .focused($focusField, equals: .itemName)
+                                    .onSubmit {
+                                        moveToNextField(.fee)
+                                    }
+                                    .onChange(of: name) {
+                                        // Clear validation error and hide triangle if name is no longer empty
+                                        if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                            nameValidationError = nil
+                                            showNameTriangle = false
+                                            checkAndHideValidationSummary()
+                                        }
+                                    }
+                                    .onChange(of: focusField) { _, newValue in
+                                        // Track when name field has been focused
+                                        if newValue == .itemName {
+                                            nameHasBeenFocused = true
+                                        }
+                                    }
+                                
+                                // Show validation triangle if triggered by action button or if field was focused and has error
+                                if showNameTriangle || (nameHasBeenFocused && focusField != .itemName && nameValidationError != nil && name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.red)
+                                        .font(.caption)
                                 }
                             }
-                    }   label: {
-                        Text("").foregroundStyle(.secondary)
-                    }
-                    
-                    Picker(" Type", selection: $itemType) {
-                        ForEach(ItemType.allCases) {type in
-                            Text(type.rawValue)
+                        }   label: {
+                            Text("").foregroundStyle(.secondary)
                         }
+                        
+                        Picker(" Type", selection: $itemType) {
+                            ForEach(ItemType.allCases) {type in
+                                Text(type.rawValue)
+                            }
+                        }
+                        
+                        LabeledContent {
+                            TextField("$ Fee", value: $fee, formatter: isFocused ? decimalNumberFormatter : currencyNumberFormatter)
+                                .keyboardType(.decimalPad)
+                                .focused($isFocused)
+                                .focused($focusField, equals: .fee)
+                            
+                        } label: {
+                            Text("")
+                        }
+                        .keyboardType(.decimalPad)
                     }
                     
-                    LabeledContent {
-                        TextField("$ Fee", value: $fee, formatter: isFocused ? decimalNumberFormatter : currencyNumberFormatter)
-                            .keyboardType(.decimalPad)
-                            .focused($isFocused)
-                            .focused($focusField, equals: .fee)
-                        
-                    } label: {
-                        Text("")
+                    Section("Notes") {
+                        TextField("", text: $notes, axis: .vertical)
                     }
-                    .keyboardType(.decimalPad)
                 }
-                Section("Notes") {
-                    TextField("", text: $notes, axis: .vertical)
-                }
-                .onAppear {
-                    name = item.name
-                    itemType = item.itemType
-                    fee = item.fee
-                    notes = item.notes
-                }
-                
             }
-        }
+            .onAppear {
+                name = item.name
+                itemType = item.itemType
+                fee = item.fee
+                notes = item.notes
+            }
             .navigationBarBackButtonHidden()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -141,6 +162,7 @@ struct ItemEditView: View {
                     Button("Done", systemImage: "checkmark.circle.fill") {
                         if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             nameValidationError = "Item name is required"
+                            showNameTriangle = true // Show triangle when action button pressed
                             withAnimation(.easeIn(duration: 0.3)) {
                                 showValidationSummary = true
                             }
@@ -149,12 +171,13 @@ struct ItemEditView: View {
                         item.name = name
                         item.itemType = itemType
                         item.fee = fee ?? .zero
+                        item.notes = notes
                         dismiss()
-                        
                     }
                 }
             }
         }
+        .navigationBarBackButtonHidden()
     }
     
     /// Smoothly transitions focus to the next field to prevent keyboard flickering
@@ -163,7 +186,6 @@ struct ItemEditView: View {
             focusField = nextField
         }
     }
-    
 }
 
 #Preview {

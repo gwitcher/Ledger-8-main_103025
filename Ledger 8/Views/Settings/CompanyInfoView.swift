@@ -22,6 +22,10 @@ struct CompanyInfoView: View {
     @State private var emailHasBeenFocused = false
     @State private var phoneHasBeenFocused = false
     
+    // MARK: - Action-triggered validation indicators
+    @State private var showEmailTriangle = false
+    @State private var showPhoneTriangle = false
+    
     // MARK: - Validation Summary State
     @State private var showValidationSummary = false
     
@@ -114,8 +118,8 @@ struct CompanyInfoView: View {
                                     }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if emailHasBeenFocused && focusedField != .email && emailValidationError != nil && !userData.company.email.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showEmailTriangle || (emailHasBeenFocused && focusedField != .email && emailValidationError != nil && !userData.company.email.isEmpty) {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -147,8 +151,8 @@ struct CompanyInfoView: View {
                                     }
                                 }
                             
-                            // Show validation feedback only if field has been focused and user moved on
-                            if phoneHasBeenFocused && focusedField != .phone && phoneValidationError != nil && !userData.company.phone.isEmpty {
+                            // Show validation triangle if triggered by action button or if field was focused and has error
+                            if showPhoneTriangle || (phoneHasBeenFocused && focusedField != .phone && phoneValidationError != nil && !userData.company.phone.isEmpty) {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -241,8 +245,16 @@ struct CompanyInfoView: View {
                         // Run all validations before attempting to close
                         validateAllFields()
                         
-                        // If there are validation errors, show the summary banner
+                        // If there are validation errors, show the summary banner and triangles
                         if hasValidationErrors {
+                            // Show triangles for fields with errors
+                            if emailValidationError != nil {
+                                showEmailTriangle = true
+                            }
+                            if phoneValidationError != nil {
+                                showPhoneTriangle = true
+                            }
+                            
                             withAnimation(.easeIn(duration: 0.3)) {
                                 showValidationSummary = true
                             }
@@ -286,6 +298,7 @@ extension CompanyInfoView {
         // Clear error if field is empty (email is optional)
         guard !email.isEmpty else {
             emailValidationError = nil
+            showEmailTriangle = false
             checkAndHideValidationSummary()
             return
         }
@@ -293,6 +306,7 @@ extension CompanyInfoView {
         // Use ValidationHelper to check email format
         if ValidationHelper.isValidEmail(email) {
             emailValidationError = nil
+            showEmailTriangle = false
         } else {
             emailValidationError = "Invalid email format"
         }
@@ -304,6 +318,7 @@ extension CompanyInfoView {
         // Clear error if field is empty (phone is optional)
         guard !phone.isEmpty else {
             phoneValidationError = nil
+            showPhoneTriangle = false
             checkAndHideValidationSummary()
             return
         }
@@ -311,6 +326,7 @@ extension CompanyInfoView {
         // Use ValidationHelper to check phone format
         if ValidationHelper.isValidPhoneNumber(phone) {
             phoneValidationError = nil
+            showPhoneTriangle = false
         } else {
             phoneValidationError = "Invalid phone number format"
         }

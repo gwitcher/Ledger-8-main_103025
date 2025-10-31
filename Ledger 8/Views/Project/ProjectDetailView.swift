@@ -27,6 +27,15 @@ struct ProjectDetailView: View {
     @State private var artistValidationError: String?
     @State private var clientValidationError: String?
     
+    // MARK: - Focus-aware validation tracking
+    @State private var projectNameHasBeenFocused = false
+    @State private var artistHasBeenFocused = false
+    
+    // MARK: - Action-triggered validation indicators
+    @State private var showProjectNameTriangle = false
+    @State private var showArtistTriangle = false
+    @State private var showClientTriangle = false
+    
     let dateAlertMessage = "The start date must be before the end date"
     
     @State private var projectName = ""
@@ -223,21 +232,43 @@ struct ProjectDetailView: View {
     private var clientSection: some View {
         Section("Client") {
             if let client = selectedClient {
-                Text(client.fullName)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        print("Shown Client: \(client.fullName)")
-                        clientSelectSheetIsPresented.toggle()
+                HStack {
+                    Text(client.fullName)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            print("Shown Client: \(client.fullName)")
+                            clientSelectSheetIsPresented.toggle()
+                        }
+                    
+                    Spacer()
+                    
+                    // Show validation triangle if triggered by action button (shouldn't show when client is selected, but keeping structure consistent)
+                    if showClientTriangle {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.red)
+                            .font(.caption)
                     }
+                }
             } else {
-                Button {
-                    clientSelectSheetIsPresented.toggle()
-                } label: {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundColor(.green)
-                        Text("Add Client")
-                            .foregroundColor(.addClient)
+                HStack {
+                    Button {
+                        clientSelectSheetIsPresented.toggle()
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(.green)
+                            Text("Add Client")
+                                .foregroundColor(.addClient)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    // Show validation triangle if triggered by action button when no client is selected
+                    if showClientTriangle {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.red)
+                            .font(.caption)
                     }
                 }
             }
@@ -268,12 +299,24 @@ struct ProjectDetailView: View {
                     .onSubmit {
                         focusField = .artist
                     }
-                    .onChange(of: focusField) {
+                    .onChange(of: focusField) { _, newValue in
+                        // Track when project name field has been focused
+                        if newValue == .project {
+                            projectNameHasBeenFocused = true
+                        }
                         handleProjectFieldFocusChange()
                     }
                     .onChange(of: projectName) { _, newValue in
                         validateProjectNameField(newValue)
                     }
+                
+                // Show validation triangle if triggered by action button or if field was focused and has error
+                if showProjectNameTriangle || (projectNameHasBeenFocused && focusField != .project && projectNameValidationError != nil && projectName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                
                 projectSuggestionsToggleButton
             }
         } label: {
@@ -326,15 +369,30 @@ struct ProjectDetailView: View {
     @ViewBuilder
     private var artistField: some View {
         LabeledContent {
-            TextField("", text: $artist)
-                .autocorrectionDisabled()
-                .focused($focusField, equals: .artist)
-                .onSubmit {
-                    focusField = nil
+            HStack {
+                TextField("", text: $artist)
+                    .autocorrectionDisabled()
+                    .focused($focusField, equals: .artist)
+                    .onSubmit {
+                        focusField = nil
+                    }
+                    .onChange(of: focusField) { _, newValue in
+                        // Track when artist field has been focused
+                        if newValue == .artist {
+                            artistHasBeenFocused = true
+                        }
+                    }
+                    .onChange(of: artist) { _, newValue in
+                        validateArtistField(newValue)
+                    }
+                
+                // Show validation triangle if triggered by action button or if field was focused and has error
+                if showArtistTriangle || (artistHasBeenFocused && focusField != .artist && artistValidationError != nil && artist.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                        .font(.caption)
                 }
-                .onChange(of: artist) { _, newValue in
-                    validateArtistField(newValue)
-                }
+            }
         } label: {
             Text("Artist").foregroundStyle(.secondary)
         }
@@ -686,8 +744,19 @@ struct ProjectDetailView: View {
                 // Run all validations before attempting save
                 validateAllFields()
                 
-                // If there are validation errors, show the summary banner
+                // If there are validation errors, show the summary banner and triangles
                 if hasValidationErrors {
+                    // Show triangles for fields with errors
+                    if projectNameValidationError != nil {
+                        showProjectNameTriangle = true
+                    }
+                    if artistValidationError != nil {
+                        showArtistTriangle = true
+                    }
+                    if clientValidationError != nil {
+                        showClientTriangle = true
+                    }
+                    
                     withAnimation(.easeIn(duration: 0.3)) {
                         showValidationSummary = true
                     }
@@ -988,6 +1057,7 @@ struct ProjectDetailView: View {
         // Project name is required for musicians' gig tracking
         if ValidationHelper.isNotEmpty(projectName) {
             projectNameValidationError = nil
+            showProjectNameTriangle = false
         } else {
             projectNameValidationError = "Project name is required"
         }
@@ -999,6 +1069,7 @@ struct ProjectDetailView: View {
         // Artist field is optional but should not be just whitespace if provided
         if artist.isEmpty || ValidationHelper.isNotEmpty(artist) {
             artistValidationError = nil
+            showArtistTriangle = false
         } else {
             artistValidationError = "Artist name cannot be just whitespace"
         }
@@ -1020,6 +1091,7 @@ struct ProjectDetailView: View {
         // Client is required for professional gig tracking and invoicing
         if selectedClient != nil {
             clientValidationError = nil
+            showClientTriangle = false  // Hide triangle when client is selected
         } else {
             clientValidationError = "Client selection is required"
         }
