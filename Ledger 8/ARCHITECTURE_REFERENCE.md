@@ -48,7 +48,7 @@ Senior developer recommends **Phase 0** completion within 1 week before any feat
 - `.gitignore` - Xcode/Swift project gitignore configuration
 
 ### **📊 Data Models (`Models/` folder)**
-- `Project.swift` - Core project entity with status lifecycle, dates, relationships
+- `Project.swift` - Core project entity with status lifecycle, dates, relationships, and suggestion scoring
 - `Client.swift` - Contact management (personal, company, address info)  
 - `Item.swift` - Billable services/items with fees and ItemType categorization
 - `Invoice.swift` - PDF invoice generation with URL storage and numbering
@@ -66,6 +66,8 @@ Senior developer recommends **Phase 0** completion within 1 week before any feat
 - `ProjectDetailView.swift` - Full project creation/editing form (871 lines)
 - `ProjectView.swift` - Individual project card display
 - `SortedProjectView.swift` - Filtered project lists with swipe actions and monthly grouping
+- `MarkedForDeletionView.swift` - Dedicated view for projects pending deletion (planned)
+- `ProjectSuggestionsView.swift` - Smart project suggestions with hide/unhide functionality (planned)
 
 ### **👥 UI Views - Client Management**  
 - `ClientListView.swift` - Client directory with search/management
@@ -96,6 +98,7 @@ Senior developer recommends **Phase 0** completion within 1 week before any feat
 - `BankingInfoView.swift` - Banking and payment app info (78 lines)
 - `CompanyLogoView.swift` - Logo display component
 - `DataBackupView.swift` - Data backup and export interface (new)
+- `HiddenSuggestionsView.swift` - Manage hidden project suggestions with restore functionality (planned)
 
 ### **📈 UI Views - Analytics**
 - `Charts.swift` - Main analytics dashboard
@@ -228,6 +231,59 @@ class Project: Identifiable {
 - **@AppStorage:** User preferences, company info, banking details
 - **File System:** Generated PDF invoices in Documents directory
 
+### **Project Suggestions System** *(Planned Enhancement)*
+**Purpose:** Smart project suggestions with user customization
+
+**New Project Model Properties:**
+```swift
+// Add these properties to Project model
+@Model
+class Project: Identifiable {
+    // ... existing properties
+    
+    // New suggestion-related properties
+    var isHiddenFromSuggestions: Bool = false
+    var suggestionScore: Int = 0 // Calculated based on frequency and recency
+    var lastUsedForSuggestion: Date = Date.distantPast
+    
+    // ... rest of existing implementation
+}
+```
+
+**Suggestion Management Service:**
+```swift
+class ProjectSuggestionsService {
+    static func getSuggestionsForClient(_ client: Client) -> [Project] {
+        // Return non-hidden suggestions sorted by suggestionScore
+        return client.project?
+            .filter { !$0.isHiddenFromSuggestions }
+            .sorted { $0.suggestionScore > $1.suggestionScore } ?? []
+    }
+    
+    static func updateSuggestionScore(for project: Project) {
+        // Calculate score based on:
+        // - Usage frequency (how often this project name appears)
+        // - Recency (when it was last used)
+        // - Client relationship (how often used with this client)
+    }
+    
+    static func hideProjectFromSuggestions(_ project: Project) {
+        project.isHiddenFromSuggestions = true
+    }
+    
+    static func unhideProjectFromSuggestions(_ project: Project) {
+        project.isHiddenFromSuggestions = false
+    }
+}
+```
+
+**Features:**
+- **Swipe to Hide**: Swipe left on suggestions to hide them from future lists
+- **Easy Restore**: Settings view showing hidden suggestions with tap-to-unhide
+- **Smart Sorting**: Suggestions ranked by frequency and recency
+- **Client-Specific**: Different suggestion sets per client based on project history
+- **Visual Feedback**: Hidden suggestions appear dimmed in management view
+
 ---
 
 ## 🎯 **Key Features Implemented**
@@ -344,6 +400,7 @@ class Project: Identifiable {
 - Email functionality
 - Data export capabilities  
 - Advanced analytics features
+- **Smart project suggestions** with hide/unhide functionality and user customization
 - **Model consistency**: Standardize all models to use explicit `UUID` IDs
 
 ---
@@ -409,6 +466,7 @@ class Project: Identifiable {
 - "All Day" toggle for project dates
 - Time zone support for date selection
 - Recurring gig scheduling and templates
+- **Project suggestions enhancements** - Add hide/unhide functionality with swipe gestures
 - Calendar integration foundations
 
 **Week 6: File Management & Attachments**
@@ -482,6 +540,7 @@ class Project: Identifiable {
 - Advanced scheduling optimization with conflict detection
 - Travel time calculation integration
 - Automated tax calculation and reporting
+- **Advanced project suggestions**: Machine learning-based suggestions, cross-client pattern recognition, seasonal project recommendations
 
 ### **Resource Allocation Recommendations** *(Senior Developer Review)*
 
