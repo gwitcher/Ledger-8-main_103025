@@ -6,12 +6,21 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ClientEditView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     
     var client: Client
+    
+    // MARK: - Validation State
+    @State private var validationState = FormValidationState()
+    
+    // MARK: - Real-time Validation States
+    @State private var emailValidationError: String?
+    @State private var phoneValidationError: String?
+    @State private var nameValidationError: String?
     
     @State private var firstName = ""
     @State private var lastName = ""
@@ -28,6 +37,13 @@ struct ClientEditView: View {
     
     @FocusState private var focusField: clientField?
     
+    // MARK: - Computed Properties
+    
+    /// Checks if there are any real-time validation errors
+    private var hasValidationErrors: Bool {
+        return emailValidationError != nil || phoneValidationError != nil || nameValidationError != nil
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -40,6 +56,9 @@ struct ClientEditView: View {
                             .submitLabel(.next)
                             .onSubmit {
                                 focusField = .lastName
+                            }
+                            .onChange(of: firstName) { _, _ in
+                                validateNameFields()
                             }
                         
                     }   label: {
@@ -54,6 +73,9 @@ struct ClientEditView: View {
                             .submitLabel(.next)
                             .onSubmit {
                                 focusField = .email
+                            }
+                            .onChange(of: lastName) { _, _ in
+                                validateNameFields()
                             }
                         
                     }   label: {
@@ -71,6 +93,9 @@ struct ClientEditView: View {
                             .onSubmit {
                                 focusField = .phone
                             }
+                            .onChange(of: email) { _, newValue in
+                                validateEmailField(newValue)
+                            }
                         
                     }   label: {
                         Text("Email").foregroundStyle(.secondary)
@@ -86,6 +111,9 @@ struct ClientEditView: View {
                             .onSubmit {
                                 focusField = .attn
                             }
+                            .onChange(of: phone) { _, newValue in
+                                validatePhoneField(newValue)
+                            }
                     }   label: {
                         Text("Phone").foregroundStyle(.secondary)
                             
@@ -96,11 +124,14 @@ struct ClientEditView: View {
                     LabeledContent {
                         TextField("", text: $company)
                             .autocorrectionDisabled()
-                            .textContentType(.telephoneNumber)
+                            .textContentType(.organizationName)
                             .focused($focusField, equals: .company)
                             .submitLabel(.next)
                             .onSubmit {
                                 focusField = .attn
+                            }
+                            .onChange(of: company) { _, _ in
+                                validateNameFields()
                             }
                     }   label: {
                         Text("Company").foregroundStyle(.secondary)
@@ -214,25 +245,124 @@ struct ClientEditView: View {
                 company = client.company
             }
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done", systemImage: "checkmark.circle.fill") {
-                        client.firstName = firstName
-                        client.lastName = lastName
-                        client.email = email
-                        client.phone = phone
-                        client.attention = attention
-                        client.address = address
-                        client.address2 = address2
-                        client.city = city
-                        client.state = state
-                        client.zip = zip
-                        client.notes = notes
-                        client.company = company
-                        
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel", systemImage: "xmark", role: .cancel) {
                         dismiss()
                     }
                 }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done", systemImage: "checkmark.circle.fill") {
+                        // Run final validation
+                        validateNameFields()
+                        
+                        if saveClient() {
+                            dismiss()
+                        }
+                        // If saveClient() returns false, we stay on the form
+                        // The validation alert will be shown via the .validationErrorAlert modifier
+                    }
+                    .disabled(hasValidationErrors)
+                    .foregroundColor(hasValidationErrors ? .gray : .blue)
+                }
             }
+            .validationErrorAlert($validationState.currentError)
+        }
+    }
+    
+    // MARK: - Real-time Validation Methods
+    
+    /// Validates email field in real-time using ValidationHelper
+    private func validateEmailField(_ email: String) {
+        // Clear error if field is empty (email is optional)
+        guard !email.isEmpty else {
+            emailValidationError = nil
+            return
+        }
+        
+        // Use ValidationHelper to check email format
+        if ValidationHelper.isValidEmail(email) {
+            emailValidationError = nil
+        } else {
+            emailValidationError = "Invalid email format"
+        }
+    }
+    
+    /// Validates phone field in real-time using ValidationHelper
+    private func validatePhoneField(_ phone: String) {
+        // Clear error if field is empty (phone is optional)
+        guard !phone.isEmpty else {
+            phoneValidationError = nil
+            return
+        }
+        
+        // Use ValidationHelper to check phone format
+        if ValidationHelper.isValidPhoneNumber(phone) {
+            phoneValidationError = nil
+        } else {
+            phoneValidationError = "Invalid phone number format"
+        }
+    }
+    
+    /// Validates that at least name or company is provided
+    private func validateNameFields() {
+        let hasName = ValidationHelper.isNotEmpty(firstName) || ValidationHelper.isNotEmpty(lastName)
+        let hasCompany = ValidationHelper.isNotEmpty(company)
+        
+        if !hasName && !hasCompany {
+            nameValidationError = "Name or Company is required"
+        } else {
+            nameValidationError = nil
+        }
+    }
+    
+    private func saveClient() -> Bool {
+        // Create temporary client for validation
+        let tempClient = Client(
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phone: phone,
+            attention: attention,
+            address: address,
+            address2: address2,
+            city: city,
+            state: state,
+            zip: zip,
+            notes: notes,
+            company: company
+        )
+        
+        // Validate before saving
+        validationState.validate(tempClient)
+        
+        if !validationState.isValid {
+            ErrorHandler.handle(validationState.currentError ?? LedgerError.validationFailed("Unknown validation error"), context: "Client Edit")
+            return false
+        }
+        
+        // Update the existing client
+        client.firstName = firstName
+        client.lastName = lastName
+        client.email = email
+        client.phone = phone
+        client.attention = attention
+        client.address = address
+        client.address2 = address2
+        client.city = city
+        client.state = state
+        client.zip = zip
+        client.notes = notes
+        client.company = company
+        
+        do {
+            try modelContext.save()
+            ErrorHandler.logInfo("Client updated successfully", context: "Client Edit")
+            return true
+        } catch {
+            ErrorHandler.handle(error, context: "Client Edit - SwiftData")
+            validationState.currentError = LedgerError.dataCorruption
+            return false
         }
     }
 }

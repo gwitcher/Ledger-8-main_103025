@@ -21,6 +21,12 @@ struct ProjectDetailView: View {
     // MARK: - Validation State
     @State private var validationState = FormValidationState()
     
+    // MARK: - Real-time Validation States
+    @State private var projectNameValidationError: String?
+    @State private var dateRangeValidationError: String?
+    @State private var artistValidationError: String?
+    @State private var clientValidationError: String?
+    
     let dateAlertMessage = "The start date must be before the end date"
     
     @State private var projectName = ""
@@ -47,6 +53,16 @@ struct ProjectDetailView: View {
     @State private var showEndDatePicker = false
     @State private var showEndTimePicker = false
     @State private var scrollProxy: ScrollViewProxy?
+    
+    // MARK: - Computed Properties
+    
+    /// Checks if there are any real-time validation errors
+    private var hasValidationErrors: Bool {
+        return projectNameValidationError != nil || 
+               dateRangeValidationError != nil || 
+               artistValidationError != nil || 
+               clientValidationError != nil
+    }
     
     @FocusState private var focusField: ProjectField?
     
@@ -121,6 +137,8 @@ struct ProjectDetailView: View {
                 .onAppear {
                     scrollProxy = proxy
                     loadProjectData()
+                    // Run initial validation on existing project data
+                    validateAllFields()
                 }
             }
 //            .onTapGesture {
@@ -157,6 +175,7 @@ struct ProjectDetailView: View {
             }
             .onChange(of: selectedClient) {
                 showProjectSuggestions = false
+                validateClientSelection()
             }
         }
     }
@@ -165,7 +184,7 @@ struct ProjectDetailView: View {
     
     @ViewBuilder
     private var clientSection: some View {
-        Section("Client") {
+        Section("Client") {            
             if let client = selectedClient {
                 Text(client.fullName)
                     .contentShape(Rectangle())
@@ -191,7 +210,7 @@ struct ProjectDetailView: View {
     
     @ViewBuilder
     private var projectInfoSection: some View {
-        Section("Project Info") {
+        Section("Project Info") {            
             projectNameField
             projectSuggestionsList
             artistField
@@ -214,6 +233,9 @@ struct ProjectDetailView: View {
                     }
                     .onChange(of: focusField) {
                         handleProjectFieldFocusChange()
+                    }
+                    .onChange(of: projectName) { _, newValue in
+                        validateProjectNameField(newValue)
                     }
                 projectSuggestionsToggleButton
             }
@@ -272,6 +294,9 @@ struct ProjectDetailView: View {
                 .focused($focusField, equals: .artist)
                 .onSubmit {
                     focusField = nil
+                }
+                .onChange(of: artist) { _, newValue in
+                    validateArtistField(newValue)
                 }
         } label: {
             Text("Artist").foregroundStyle(.secondary)
@@ -621,6 +646,9 @@ struct ProjectDetailView: View {
         
         ToolbarItem(placement: .topBarTrailing) {
             Button("Done", systemImage: "checkmark.circle.fill") {
+                // Run all validations before attempting save
+                validateAllFields()
+                
                 if endDate < startDate {
                     showAlert.toggle()
                 } else {
@@ -632,6 +660,8 @@ struct ProjectDetailView: View {
                     // The validation alert will be shown via the .validationErrorAlert modifier
                 }
             }
+            .disabled(hasValidationErrors)
+            .foregroundColor(hasValidationErrors ? .gray : .blue)
         }
     }
     
@@ -742,6 +772,7 @@ struct ProjectDetailView: View {
             print("End Date selected: \(endDateSelected)")
             endDate = startDate.adding(hours: 1)
         }
+        validateDateRange()
     }
     
     private func handleEndDateChange() {
@@ -749,6 +780,7 @@ struct ProjectDetailView: View {
             endDateSelected = true
             print("End Date selected: \(endDateSelected)")
         }
+        validateDateRange()
     }
     
     private func handleTemplateProjectChange() {
@@ -892,6 +924,55 @@ struct ProjectDetailView: View {
             validationState.currentError = LedgerError.dataCorruption
             return false
         }
+    }
+    
+    // MARK: - Real-time Validation Methods
+    
+    /// Validates project name field in real-time using ValidationHelper
+    private func validateProjectNameField(_ projectName: String) {
+        // Project name is required for musicians' gig tracking
+        if ValidationHelper.isNotEmpty(projectName) {
+            projectNameValidationError = nil
+        } else {
+            projectNameValidationError = "Project name is required"
+        }
+    }
+    
+    /// Validates artist field in real-time using ValidationHelper
+    private func validateArtistField(_ artist: String) {
+        // Artist field is optional but should not be just whitespace if provided
+        if artist.isEmpty || ValidationHelper.isNotEmpty(artist) {
+            artistValidationError = nil
+        } else {
+            artistValidationError = "Artist name cannot be just whitespace"
+        }
+    }
+    
+    /// Validates date range using ValidationHelper
+    private func validateDateRange() {
+        if ValidationHelper.isValidDateRange(start: startDate, end: endDate) {
+            dateRangeValidationError = nil
+        } else {
+            dateRangeValidationError = "End date must be after start date"
+        }
+    }
+    
+    /// Validates client selection
+    private func validateClientSelection() {
+        // Client is required for professional gig tracking and invoicing
+        if selectedClient != nil {
+            clientValidationError = nil
+        } else {
+            clientValidationError = "Client selection is required"
+        }
+    }
+    
+    /// Runs all validation checks at once
+    private func validateAllFields() {
+        validateProjectNameField(projectName)
+        validateArtistField(artist)
+        validateDateRange()
+        validateClientSelection()
     }
     
     func clearTextFields() {

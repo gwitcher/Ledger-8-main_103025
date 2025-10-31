@@ -17,6 +17,11 @@ struct NewClientView: View {
     // MARK: - Validation State
     @State private var validationState = FormValidationState()
     
+    // MARK: - Real-time Validation States
+    @State private var emailValidationError: String?
+    @State private var phoneValidationError: String?
+    @State private var nameValidationError: String?
+    
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var email = ""
@@ -32,6 +37,13 @@ struct NewClientView: View {
     
     @FocusState private var focusField: clientField?
     
+    // MARK: - Computed Properties
+    
+    /// Checks if there are any real-time validation errors
+    private var hasValidationErrors: Bool {
+        return emailValidationError != nil || phoneValidationError != nil || nameValidationError != nil
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -44,6 +56,9 @@ struct NewClientView: View {
                             .submitLabel(.next)
                             .onSubmit {
                                 focusField = .lastName
+                            }
+                            .onChange(of: firstName) { _, _ in
+                                validateNameFields()
                             }
                         
                     }   label: {
@@ -59,6 +74,9 @@ struct NewClientView: View {
                             .submitLabel(.next)
                             .onSubmit {
                                 focusField = .email
+                            }
+                            .onChange(of: lastName) { _, _ in
+                                validateNameFields()
                             }
                         
                     }   label: {
@@ -76,6 +94,9 @@ struct NewClientView: View {
                             .onSubmit {
                                 focusField = .phone
                             }
+                            .onChange(of: email) { _, newValue in
+                                validateEmailField(newValue)
+                            }
                         
                     }   label: {
                         Text("Email").foregroundStyle(.secondary)
@@ -90,6 +111,9 @@ struct NewClientView: View {
                             .submitLabel(.next)
                             .onSubmit {
                                 focusField = .company
+                            }
+                            .onChange(of: phone) { _, newValue in
+                                validatePhoneField(newValue)
                             }
                     }   label: {
                         Text("Phone").foregroundStyle(.secondary)
@@ -106,6 +130,9 @@ struct NewClientView: View {
                             .submitLabel(.next)
                             .onSubmit {
                                 focusField = .attn
+                            }
+                            .onChange(of: company) { _, _ in
+                                validateNameFields()
                             }
                     }   label: {
                         Text("Company").foregroundStyle(.secondary)
@@ -213,6 +240,9 @@ struct NewClientView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done", systemImage: "checkmark.circle.fill") {
+                        // Run final validation including name requirement
+                        validateNameFields()
+                        
                         if saveClient(firstName: firstName, lastName: lastName, email: email, phone: phone,attention: attention, address: address, address2: address2, city: city, state: state, zip: zip, notes: notes, company: company) {
                             firstName = ""
                             lastName = ""
@@ -232,9 +262,57 @@ struct NewClientView: View {
                         // If saveClient() returns false, we stay on the form
                         // The validation alert will be shown via the .validationErrorAlert modifier
                     }
+                    .disabled(hasValidationErrors)
+                    .foregroundColor(hasValidationErrors ? .gray : .blue)
                 }
             }
             .validationErrorAlert($validationState.currentError)
+        }
+    }
+    
+    // MARK: - Real-time Validation Methods
+    
+    /// Validates email field in real-time using ValidationHelper
+    private func validateEmailField(_ email: String) {
+        // Clear error if field is empty (email is optional)
+        guard !email.isEmpty else {
+            emailValidationError = nil
+            return
+        }
+        
+        // Use ValidationHelper to check email format
+        if ValidationHelper.isValidEmail(email) {
+            emailValidationError = nil
+        } else {
+            emailValidationError = "Invalid email format"
+        }
+    }
+    
+    /// Validates phone field in real-time using ValidationHelper
+    private func validatePhoneField(_ phone: String) {
+        // Clear error if field is empty (phone is optional)
+        guard !phone.isEmpty else {
+            phoneValidationError = nil
+            return
+        }
+        
+        // Use ValidationHelper to check phone format
+        if ValidationHelper.isValidPhoneNumber(phone) {
+            phoneValidationError = nil
+        } else {
+            phoneValidationError = "Invalid phone number format"
+        }
+    }
+    
+    /// Validates that at least name or company is provided
+    private func validateNameFields() {
+        let hasName = ValidationHelper.isNotEmpty(firstName) || ValidationHelper.isNotEmpty(lastName)
+        let hasCompany = ValidationHelper.isNotEmpty(company)
+        
+        if !hasName && !hasCompany {
+            nameValidationError = "Name or Company is required"
+        } else {
+            nameValidationError = nil
         }
     }
     
