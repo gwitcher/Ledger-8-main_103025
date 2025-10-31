@@ -18,6 +18,9 @@ struct ProjectDetailView: View {
     
     var project: Project
     
+    // MARK: - Validation State
+    @State private var validationState = FormValidationState()
+    
     let dateAlertMessage = "The start date must be before the end date"
     
     @State private var projectName = ""
@@ -130,6 +133,7 @@ struct ProjectDetailView: View {
                     dismissButton: .default(Text("OK"))
                 )
             }
+            .validationErrorAlert($validationState.currentError)
             .toolbar {
                 toolbarContent
             }
@@ -620,9 +624,12 @@ struct ProjectDetailView: View {
                 if endDate < startDate {
                     showAlert.toggle()
                 } else {
-                    saveProject()
-                    clearTextFields()
-                    dismiss()
+                    if saveProject() {
+                        clearTextFields()
+                        dismiss()
+                    }
+                    // If saveProject() returns false, we stay on the form
+                    // The validation alert will be shown via the .validationErrorAlert modifier
                 }
             }
         }
@@ -760,7 +767,7 @@ struct ProjectDetailView: View {
     private func handleDeliveredChange() {
         dateDelivered = Date.now
         updateProjectStatus()
-        saveProject()
+        _ = saveProject() // Ignore return value for background saves
     }
     
     private func handlePaidChange() {
@@ -769,7 +776,7 @@ struct ProjectDetailView: View {
             delivered = true
         }
         updateProjectStatus()
-        saveProject()
+        _ = saveProject() // Ignore return value for background saves
     }
     
     private func updateProjectStatus() {
@@ -828,13 +835,39 @@ struct ProjectDetailView: View {
         }
     }
     
-    func saveProject() {
+    func saveProject() -> Bool {
+        // Create a temporary project for validation
+        let tempProject = Project(
+            projectName: projectName,
+            artist: artist,
+            startDate: startDate,
+            endDate: endDate,
+            status: status,
+            mediaType: mediaType,
+            notes: notes,
+            delivered: delivered,
+            paid: paid,
+            dateOpened: project.dateOpened,
+            dateDelivered: dateDelivered,
+            dateClosed: dateClosed,
+            endDateSelected: endDateSelected
+        )
+        
+        // Validate before saving
+        validationState.validate(tempProject)
+        
+        if !validationState.isValid {
+            ErrorHandler.handle(validationState.currentError ?? LedgerError.validationFailed("Unknown validation error"), context: "Project Save")
+            return false
+        }
+        
         print("Save before: Project Client: \(project.client?.fullName ?? "NIL"), SelectedClient: \(selectedClient?.fullName ?? "NIL")")
         
         project.client = selectedClient
         
         print("Save after: Project Client: \(project.client?.fullName ?? "NIL"), SelectedClient: \(selectedClient?.fullName ?? "NIL")")
         
+        // Only save if validation passes
         project.projectName = projectName
         project.artist = artist
         project.startDate = startDate
@@ -850,9 +883,14 @@ struct ProjectDetailView: View {
         
         modelContext.insert(project)
         
-        guard let _ = try? modelContext.save() else{
-            print("😡 ERROR: Cannot save")
-            return
+        do {
+            try modelContext.save()
+            ErrorHandler.logInfo("Project saved successfully", context: "Project Save")
+            return true
+        } catch {
+            ErrorHandler.handle(error, context: "Project Save - SwiftData")
+            validationState.currentError = LedgerError.dataCorruption
+            return false
         }
     }
     

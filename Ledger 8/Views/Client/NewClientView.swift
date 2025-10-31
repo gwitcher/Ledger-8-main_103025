@@ -14,6 +14,9 @@ struct NewClientView: View {
     
     @State private var client = Client()
     
+    // MARK: - Validation State
+    @State private var validationState = FormValidationState()
+    
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var email = ""
@@ -98,7 +101,7 @@ struct NewClientView: View {
                     LabeledContent {
                         TextField("", text: $company)
                             .autocorrectionDisabled()
-                            .textContentType(.telephoneNumber)
+                            .textContentType(.organizationName)
                             .focused($focusField, equals: .company)
                             .submitLabel(.next)
                             .onSubmit {
@@ -210,31 +213,56 @@ struct NewClientView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done", systemImage: "checkmark.circle.fill") {
-                        saveClient(firstName: firstName, lastName: lastName, email: email, phone: phone,attention: attention, address: address, address2: address2, city: city, state: state, zip: zip, notes: notes, company: company)
-                        
-                        firstName = ""
-                        lastName = ""
-                        email = ""
-                        phone = ""
-                        attention = ""
-                        address = ""
-                        address2 = ""
-                        city = ""
-                        state = ""
-                        zip = ""
-                        notes = ""
-                        company = ""
-                        
-                        dismiss()
-                        
+                        if saveClient(firstName: firstName, lastName: lastName, email: email, phone: phone,attention: attention, address: address, address2: address2, city: city, state: state, zip: zip, notes: notes, company: company) {
+                            firstName = ""
+                            lastName = ""
+                            email = ""
+                            phone = ""
+                            attention = ""
+                            address = ""
+                            address2 = ""
+                            city = ""
+                            state = ""
+                            zip = ""
+                            notes = ""
+                            company = ""
+                            
+                            dismiss()
+                        }
+                        // If saveClient() returns false, we stay on the form
+                        // The validation alert will be shown via the .validationErrorAlert modifier
                     }
                 }
             }
+            .validationErrorAlert($validationState.currentError)
         }
-        
     }
     
-    func saveClient(firstName: String, lastName: String, email: String, phone: String, attention: String, address: String, address2: String, city: String, state: String, zip: String, notes: String, company: String ) {
+    private func saveClient(firstName: String, lastName: String, email: String, phone: String, attention: String, address: String, address2: String, city: String, state: String, zip: String, notes: String, company: String) -> Bool {
+        // Create temporary client for validation
+        let tempClient = Client(
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phone: phone,
+            attention: attention,
+            address: address,
+            address2: address2,
+            city: city,
+            state: state,
+            zip: zip,
+            notes: notes,
+            company: company
+        )
+        
+        // Validate before saving
+        validationState.validate(tempClient)
+        
+        if !validationState.isValid {
+            ErrorHandler.handle(validationState.currentError ?? LedgerError.validationFailed("Unknown validation error"), context: "Client Save")
+            return false
+        }
+        
         client.firstName = firstName
         client.lastName = lastName
         client.email = email
@@ -248,15 +276,20 @@ struct NewClientView: View {
         client.notes = notes
         client.company = company
         
-        
         modelContext.insert(client)
-        guard let _ = try? modelContext.save() else{
-            print("😡 ERROR: Cannot save")
-            return
+        
+        do {
+            try modelContext.save()
+            ErrorHandler.logInfo("Client saved successfully", context: "Client Save")
+            return true
+        } catch {
+            ErrorHandler.handle(error, context: "Client Save - SwiftData")
+            validationState.currentError = LedgerError.dataCorruption
+            return false
         }
-
     }
 }
+
 
 #Preview {
     NavigationStack {

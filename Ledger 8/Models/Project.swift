@@ -89,19 +89,9 @@ class Project: Identifiable {
 // MARK: - Validation
 extension Project: Validatable {
     func validate() throws {
-        // Validate project name
-        if !ValidationHelper.isNotEmpty(projectName) {
-            throw LedgerError.emptyRequiredField("Project Name")
-        }
-        
-        // Validate date range
+        // Validate date range - only requirement
         if endDate <= startDate {
             throw LedgerError.invalidDateRange
-        }
-        
-        // Validate artist name
-        if !ValidationHelper.isNotEmpty(artist) {
-            throw LedgerError.emptyRequiredField("Artist")
         }
     }
 }
