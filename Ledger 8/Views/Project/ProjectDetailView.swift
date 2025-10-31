@@ -386,8 +386,8 @@ struct ProjectDetailView: View {
                         validateArtistField(newValue)
                     }
                 
-                // Show validation triangle if triggered by action button or if field was focused and has error
-                if showArtistTriangle || (artistHasBeenFocused && focusField != .artist && artistValidationError != nil && artist.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                // Show validation triangle if triggered by action button or if field has validation error
+                if showArtistTriangle || (artistHasBeenFocused && focusField != .artist && artistValidationError != nil) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.red)
                         .font(.caption)
@@ -1013,7 +1013,7 @@ struct ProjectDetailView: View {
         validationState.validate(tempProject)
         
         if !validationState.isValid {
-            ErrorHandler.handle(validationState.currentError ?? LedgerError.validationFailed("Unknown validation error"), context: "Project Save")
+            ErrorHandler.handle(validationState.currentError ?? LedgerError.validationFailed("Unknown validation error"), context: "ProjectDetailView.saveProject - Line 1011 - Validation Failed")
             return false
         }
         
@@ -1044,7 +1044,7 @@ struct ProjectDetailView: View {
             ErrorHandler.logInfo("Project saved successfully", context: "Project Save")
             return true
         } catch {
-            ErrorHandler.handle(error, context: "Project Save - SwiftData")
+            ErrorHandler.handle(error, context: "ProjectDetailView.saveProject - Line 1042 - SwiftData Insert Failed")
             validationState.currentError = LedgerError.dataCorruption
             return false
         }
@@ -1066,11 +1066,16 @@ struct ProjectDetailView: View {
     
     /// Validates artist field in real-time using ValidationHelper
     private func validateArtistField(_ artist: String) {
-        // Artist field is optional but should not be just whitespace if provided
-        if artist.isEmpty || ValidationHelper.isNotEmpty(artist) {
+        // Artist field is completely optional - no validation required
+        // Only validate if user provides content to ensure it's not just whitespace
+        let trimmed = artist.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if artist.isEmpty || !trimmed.isEmpty {
+            // Empty is fine (optional field) or has actual content
             artistValidationError = nil
             showArtistTriangle = false
         } else {
+            // Has characters but only whitespace
             artistValidationError = "Artist name cannot be just whitespace"
         }
         checkAndHideValidationSummary()
