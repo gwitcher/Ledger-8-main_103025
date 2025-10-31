@@ -760,8 +760,8 @@ struct ProjectDetailView: View {
                     withAnimation(.easeIn(duration: 0.3)) {
                         showValidationSummary = true
                     }
-                    // Scroll to banner so user can see validation guidance
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    // Scroll to banner after animation completes and view has time to layout
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         scrollToValidationBanner()
                     }
                     return

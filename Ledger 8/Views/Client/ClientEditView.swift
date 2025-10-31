@@ -65,7 +65,7 @@ struct ClientEditView: View {
             errors.append(.phone(phoneError))
         }
         if let nameError = nameValidationError {
-            errors.append(ValidationBannerError(fieldName: "Name or Company", message: nameError, icon: "circle.fill"))
+            errors.append(ValidationBannerError(fieldName: "Name or Company", message: nameError, icon: "person.fill"))
         }
         
         return errors
@@ -357,8 +357,8 @@ struct ClientEditView: View {
                             withAnimation(.easeIn(duration: 0.3)) {
                                 showValidationSummary = true
                             }
-                            // Auto-scroll to banner
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            // Auto-scroll to banner after animation completes and view has time to layout
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                                 scrollToValidationBanner()
                             }
                             return
