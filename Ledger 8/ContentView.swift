@@ -11,15 +11,9 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) var modelContext
     
-    //@Query var projects: [Project]
-    
     var body: some View {
         NavigationStack{
             ProjectListView()
-            //MainView()
-            //ClientListView()
-            //UserDefaultsView()
-            //Charts()
         }
         .navigationTitle("Projects")
     }
