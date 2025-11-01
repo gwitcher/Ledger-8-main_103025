@@ -17,8 +17,8 @@ struct PhoneNumberFormatter {
     /// - Parameter input: The raw phone number input from the user
     /// - Returns: Formatted phone number string
     static func formatAsTyping(_ input: String) -> String {
-        // Remove all non-numeric characters for processing
-        let digitsOnly = input.filter { $0.isNumber }
+        // Remove all non-numeric characters for processing (ASCII digits only for security)
+        let digitsOnly = input.filter { $0.isASCII && $0.isNumber }
         
         // Don't format if empty or too long (more than 11 digits for US numbers)
         guard !digitsOnly.isEmpty, digitsOnly.count <= 11 else {
@@ -74,8 +74,8 @@ struct PhoneNumberFormatter {
     /// - Parameter phoneNumber: The phone number to validate and format
     /// - Returns: Formatted phone number if valid, or original input if invalid
     static func validateAndFormat(_ phoneNumber: String) -> String {
-        // Remove all non-numeric characters for validation
-        let digitsOnly = phoneNumber.filter { $0.isNumber }
+        // Remove all non-numeric characters for validation (ASCII digits only for security)
+        let digitsOnly = phoneNumber.filter { $0.isASCII && $0.isNumber }
         
         // Basic validation: US numbers should have 10-11 digits
         guard digitsOnly.count >= 10, digitsOnly.count <= 11 else {
@@ -95,11 +95,11 @@ struct PhoneNumberFormatter {
         }
     }
     
-    /// Extracts just the digits from a phone number for validation/storage
+    /// Extracts just the ASCII digits from a phone number for validation/storage
     /// - Parameter phoneNumber: The formatted phone number
-    /// - Returns: Just the numeric digits
+    /// - Returns: Just the ASCII numeric digits (0-9)
     static func digitsOnly(_ phoneNumber: String) -> String {
-        return phoneNumber.filter { $0.isNumber }
+        return phoneNumber.filter { $0.isASCII && $0.isNumber }
     }
     
     /// Validates if a phone number is valid using both CNPhoneNumber and custom logic
