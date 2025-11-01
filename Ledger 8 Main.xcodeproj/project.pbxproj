@@ -13,6 +13,11 @@
 		660910CE2EB5810400D1EEEC /* APPLE_STANDARD_ANALYSIS.md in Resources */ = {isa = PBXBuildFile; fileRef = 660910CD2EB5810400D1EEEC /* APPLE_STANDARD_ANALYSIS.md */; };
 		660910D02EB5816800D1EEEC /* APPLE_STANDARD_IMPLEMENTATION_PLAN.md in Resources */ = {isa = PBXBuildFile; fileRef = 660910CF2EB5816800D1EEEC /* APPLE_STANDARD_IMPLEMENTATION_PLAN.md */; };
 		660910D22EB5843700D1EEEC /* DAY_1_BASELINE_ANALYSIS.md in Resources */ = {isa = PBXBuildFile; fileRef = 660910D12EB5843700D1EEEC /* DAY_1_BASELINE_ANALYSIS.md */; };
+		660910D42EB58B7200D1EEEC /* ProjectFormValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660910D32EB58B7200D1EEEC /* ProjectFormValidator.swift */; };
+		660910D62EB58B9400D1EEEC /* ProjectValidationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660910D52EB58B9400D1EEEC /* ProjectValidationViewModel.swift */; };
+		660910D82EB58BC900D1EEEC /* ProjectFormValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660910D72EB58BC900D1EEEC /* ProjectFormValidatorTests.swift */; };
+		660910DA2EB58C0300D1EEEC /* ProjectValidationViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660910D92EB58C0300D1EEEC /* ProjectValidationViewModelTests.swift */; };
+		660910DC2EB58C4700D1EEEC /* DAY_2_PROGRESS_REPORT.md in Resources */ = {isa = PBXBuildFile; fileRef = 660910DB2EB58C4700D1EEEC /* DAY_2_PROGRESS_REPORT.md */; };
 		660EDF892EB408FF007A6895 /* ARCHITECTURE_REFERENCE.md in Resources */ = {isa = PBXBuildFile; fileRef = 660EDF882EB408FF007A6895 /* ARCHITECTURE_REFERENCE.md */; };
 		660EDF8B2EB41421007A6895 /* SENIOR_DEVELOPER_REVIEW.md in Resources */ = {isa = PBXBuildFile; fileRef = 660EDF8A2EB41421007A6895 /* SENIOR_DEVELOPER_REVIEW.md */; };
 		660EDF8D2EB41802007A6895 /* DataBackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660EDF8C2EB41802007A6895 /* DataBackupService.swift */; };
@@ -52,6 +57,11 @@
 		660910CD2EB5810400D1EEEC /* APPLE_STANDARD_ANALYSIS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = APPLE_STANDARD_ANALYSIS.md; sourceTree = "<group>"; };
 		660910CF2EB5816800D1EEEC /* APPLE_STANDARD_IMPLEMENTATION_PLAN.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = APPLE_STANDARD_IMPLEMENTATION_PLAN.md; sourceTree = "<group>"; };
 		660910D12EB5843700D1EEEC /* DAY_1_BASELINE_ANALYSIS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DAY_1_BASELINE_ANALYSIS.md; sourceTree = "<group>"; };
+		660910D32EB58B7200D1EEEC /* ProjectFormValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectFormValidator.swift; sourceTree = "<group>"; };
+		660910D52EB58B9400D1EEEC /* ProjectValidationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectValidationViewModel.swift; sourceTree = "<group>"; };
+		660910D72EB58BC900D1EEEC /* ProjectFormValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectFormValidatorTests.swift; sourceTree = "<group>"; };
+		660910D92EB58C0300D1EEEC /* ProjectValidationViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectValidationViewModelTests.swift; sourceTree = "<group>"; };
+		660910DB2EB58C4700D1EEEC /* DAY_2_PROGRESS_REPORT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DAY_2_PROGRESS_REPORT.md; sourceTree = "<group>"; };
 		660EDF882EB408FF007A6895 /* ARCHITECTURE_REFERENCE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ARCHITECTURE_REFERENCE.md; sourceTree = "<group>"; };
 		660EDF8A2EB41421007A6895 /* SENIOR_DEVELOPER_REVIEW.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SENIOR_DEVELOPER_REVIEW.md; sourceTree = "<group>"; };
 		660EDF8C2EB41802007A6895 /* DataBackupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBackupService.swift; sourceTree = "<group>"; };
@@ -167,6 +177,11 @@
 				660910C92EB57E6A00D1EEEC /* PROJECT_DETAIL_VIEW_ANALYSIS.md */,
 				660910CB2EB57EB000D1EEEC /* COMPONENT_RESPONSIBILITY_MATRIX.md */,
 				660910D12EB5843700D1EEEC /* DAY_1_BASELINE_ANALYSIS.md */,
+				660910D32EB58B7200D1EEEC /* ProjectFormValidator.swift */,
+				660910D52EB58B9400D1EEEC /* ProjectValidationViewModel.swift */,
+				660910D72EB58BC900D1EEEC /* ProjectFormValidatorTests.swift */,
+				660910D92EB58C0300D1EEEC /* ProjectValidationViewModelTests.swift */,
+				660910DB2EB58C4700D1EEEC /* DAY_2_PROGRESS_REPORT.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -320,6 +335,7 @@
 				660910CC2EB57EB000D1EEEC /* COMPONENT_RESPONSIBILITY_MATRIX.md in Resources */,
 				66C6162C2DAF2BA100161D7E /* Preview Assets.xcassets in Resources */,
 				66C6162D2DAF2BA100161D7E /* Assets.xcassets in Resources */,
+				660910DC2EB58C4700D1EEEC /* DAY_2_PROGRESS_REPORT.md in Resources */,
 				660910C82EB57D6900D1EEEC /* PROJECT_DETAIL_VIEW_REFACTORING_PLAN.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -348,7 +364,11 @@
 				660EDFEB2EB453EE007A6895 /* Extensions.swift in Sources */,
 				660EE0552EB46550007A6895 /* LedgerError.swift in Sources */,
 				669973662EB51B360050D124 /* ValidationSummaryBanner.swift in Sources */,
+				660910D82EB58BC900D1EEEC /* ProjectFormValidatorTests.swift in Sources */,
+				660910D62EB58B9400D1EEEC /* ProjectValidationViewModel.swift in Sources */,
+				660910D42EB58B7200D1EEEC /* ProjectFormValidator.swift in Sources */,
 				660EE0532EB4653B007A6895 /* ValidationHelper.swift in Sources */,
+				660910DA2EB58C0300D1EEEC /* ProjectValidationViewModelTests.swift in Sources */,
 				66C6162E2DAF2BA100161D7E /* ContentView.swift in Sources */,
 				660EDF8D2EB41802007A6895 /* DataBackupService.swift in Sources */,
 				66C616302DAF2BA100161D7E /* Ledger_8App.swift in Sources */,
