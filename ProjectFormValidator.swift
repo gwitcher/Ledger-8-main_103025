@@ -31,18 +31,18 @@ struct ProjectFormValidator {
     /// - Parameter name: The project name to validate
     /// - Returns: ValidationResult indicating success or failure with message
     static func validateProjectName(_ name: String) -> ValidationResult {
-        // Project name is required for musicians' gig tracking
-        guard ValidationHelper.isNotEmpty(name) else {
+        // Check for completely empty first
+        guard !name.isEmpty else {
             return .invalid("Project name is required")
         }
         
-        // Additional business rules can be added here
+        // Then check for whitespace-only
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.count >= 1 else {
+        guard !trimmed.isEmpty else {
             return .invalid("Project name cannot be just whitespace")
         }
         
-        // Optional: Check for reasonable length
+        // Check for reasonable length
         guard trimmed.count <= 100 else {
             return .invalid("Project name cannot exceed 100 characters")
         }

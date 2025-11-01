@@ -56,12 +56,14 @@ class ProjectValidationViewModel {
                 return .projectName(message)
             case .artist:
                 return .artist(message)
-            case .dateRange:
-                return .dateRange(message)
+            case .startDate:
+                return .dateRange(message) // Start date errors show as date range issues
+            case .endDate:
+                return .dateRange(message) // End date errors show as date range issues
             case .client:
                 return .client(message)
-            default:
-                return nil
+            case .notes:
+                return nil // Notes field doesn't have validation errors to display
             }
         }
     }
@@ -91,18 +93,33 @@ class ProjectValidationViewModel {
             result = ProjectFormValidator.validateArtist(value as? String ?? "")
             
         case .client:
-            result = ProjectFormValidator.validateClient(value)
+            // Handle optional client types correctly
+            if let clientValue = value as? String {
+                // Non-nil string client
+                result = ProjectFormValidator.validateClient(clientValue)
+            } else if value is String? {
+                // Explicitly nil string client
+                result = ProjectFormValidator.validateClient(nil as String?)
+            } else {
+                // Other types - pass through directly
+                result = ProjectFormValidator.validateClient(value)
+            }
             
-        case .dateRange:
-            // For date range, expect tuple of (Date, Date)
+        case .startDate:
+            // Individual start date validation (currently always valid)
+            result = .valid
+            
+        case .endDate:
+            // For end date, expect tuple of (startDate, endDate) for range validation
             if let dates = value as? (Date, Date) {
                 result = ProjectFormValidator.validateDateRange(start: dates.0, end: dates.1)
             } else {
                 result = .invalid("Invalid date range")
             }
             
-        default:
-            result = .valid // Fields not yet implemented
+        case .notes:
+            // Notes field doesn't have validation rules
+            result = .valid
         }
         
         // Update state based on validation result
@@ -145,9 +162,14 @@ class ProjectValidationViewModel {
     
     // MARK: - Focus Management
     
+    // Add a lock for thread safety
+    private let focusLock = NSLock()
+    
     /// Marks a field as having been focused (touched by user)
     /// - Parameter field: The field that was focused
     func markFieldAsFocused(_ field: ProjectField) {
+        focusLock.lock()
+        defer { focusLock.unlock() }
         focusedFields.insert(field)
     }
     
@@ -155,7 +177,9 @@ class ProjectValidationViewModel {
     /// - Parameter field: The field to check
     /// - Returns: Whether the field has been focused
     func hasBeenFocused(_ field: ProjectField) -> Bool {
-        focusedFields.contains(field)
+        focusLock.lock()
+        defer { focusLock.unlock() }
+        return focusedFields.contains(field)
     }
     
     // MARK: - Action-Triggered Validation (Form Submission)

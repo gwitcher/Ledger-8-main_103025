@@ -87,13 +87,12 @@ struct PhoneNumberFormatter {
             let _ = CNPhoneNumber(stringValue: phoneNumber)
             // If validation succeeds, use our custom formatting for consistent display
             return formatAsTyping(digitsOnly)
+        } catch {
+            // If CNPhoneNumber validation fails, still try our custom formatting
+            // but return original if it doesn't meet our criteria
+            let formatted = formatAsTyping(digitsOnly)
+            return formatted != digitsOnly ? formatted : phoneNumber
         }
-        //catch {
-//            // If CNPhoneNumber validation fails, still try our custom formatting
-//            // but return original if it doesn't meet our criteria
-//            let formatted = formatAsTyping(digitsOnly)
-//            return formatted != digitsOnly ? formatted : phoneNumber
-//        }
     }
     
     /// Extracts just the digits from a phone number for validation/storage
@@ -118,10 +117,9 @@ struct PhoneNumberFormatter {
         do {
             let _ = CNPhoneNumber(stringValue: phoneNumber)
             return true
+        } catch {
+            // Fall back to custom validation for basic digit count check
+            return digitsOnly.count >= 10 && digitsOnly.count <= 11
         }
-//        catch {
-//            // Fall back to our custom validation
-//            return ValidationHelper.isValidPhoneNumber(phoneNumber)
-//        }
     }
 }
